@@ -281,6 +281,39 @@
     padding:13px 15px;font-size:13px;color:#6B5300;line-height:1.6;margin-bottom:8px;
   }
 
+  /* Removable condition chips (full edit) */
+  .chips-rm{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .chip-rm{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--chip-bg);border:1px solid #E4E4EC;border-radius:7px;
+    padding:7px 10px 7px 12px;font-size:13px;color:var(--chip-text);
+  }
+  .chip-rm button{background:none;border:none;cursor:pointer;color:var(--text-mute);display:flex;padding:0;}
+  .chip-rm button:hover{color:var(--text);}
+  .chip-rm svg{width:13px;height:13px;}
+
+  /* Resources table (full edit) */
+  .res-table{
+    width:100%;border-collapse:collapse;font-size:13px;
+    border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;margin-bottom:6px;
+  }
+  .res-table th{
+    background:#F6F6FA;text-align:left;font-weight:700;color:var(--text);
+    padding:11px 12px;border-bottom:1px solid var(--line-strong);
+  }
+  .res-table td{padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--text);}
+  .res-table tr:last-child td{border-bottom:none;}
+  .res-table .rm{width:40px;text-align:center;padding-left:10px;padding-right:0;}
+  .res-table .rm button{background:none;border:none;cursor:pointer;color:var(--text-mute);display:inline-flex;}
+  .res-table .rm button:hover{color:var(--danger);}
+  .res-table .rm svg{width:17px;height:17px;}
+  .res-cell-input{
+    width:100%;border:1.5px solid transparent;border-radius:6px;
+    padding:6px 8px;font-size:13px;font-family:inherit;background:transparent;color:var(--text);
+  }
+  .res-cell-input:focus{outline:none;border-color:var(--indigo-400);background:#fff;box-shadow:0 0 0 3px rgba(81,72,234,.12);}
+  .res-cell-input.muted::placeholder{color:var(--text-mute);}
+
   /* More actions menu */
   .menu{
     position:absolute;top:48px;right:18px;background:#fff;border:1px solid var(--line);
@@ -587,13 +620,38 @@ function openEdit(){
   c.usedBySim ? renderEditRestricted() : renderEditFull();
 }
 
+const RES_PRICE = {
+  'Shovel':'$45/h','Backhoe':'$60/h','Operator':'$32.21/h','Operator (Skilled)':'$32.21/h',
+  'bulldozer':'$77/h','Bulldozer':'$77/h','Dump Truck':'$57.98/h'
+};
+const resPrice = name => RES_PRICE[name] || '--';
+
+function resRow(name, price, qty){
+  return `
+    <tr>
+      <td class="rm"><button type="button" class="rm-row" title="Remove">${SVG.x}</button></td>
+      <td>${esc(name)}</td>
+      <td><input class="res-cell-input" value="${esc(price)}" /></td>
+      <td><input class="res-cell-input" style="width:56px" value="${esc(qty)}" /></td>
+    </tr>`;
+}
+function resRowEmpty(){
+  return `
+    <tr>
+      <td class="rm"><button type="button" class="rm-row" title="Remove">${SVG.x}</button></td>
+      <td><input class="res-cell-input muted" placeholder="--" /></td>
+      <td><input class="res-cell-input muted" placeholder="--" /></td>
+      <td><input class="res-cell-input muted" placeholder="--" style="width:56px" /></td>
+    </tr>`;
+}
+
 function renderEditFull(){
   const c = getCur(currentId);
   drawerContent.innerHTML = `
     <div class="drawer-head">
       <div>
         <h2 class="drawer-title">Edit Construction Unit Rate</h2>
-        <div class="drawer-sub">Subtitle / Description</div>
+        <div class="drawer-sub">Customize which columns are visible in your execution budget views.</div>
       </div>
       <button class="icon-btn" id="eClose">${SVG.close}</button>
     </div>
@@ -616,13 +674,25 @@ function renderEditFull(){
             <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
           </div>
         </div>
-        <div class="group-label">Conditions <span class="jp">(条件)</span></div>
-        <div class="ro-tags">${c.conditions.map(t=>`<span class="ro-tag">${esc(t)}</span>`).join('')}</div>
-        <div class="group-label">Resources</div>
-        <div class="ro-tags">${c.resources.map(r=>`<span class="ro-tag">${esc(r.n)} x ${r.q}</span>`).join('')}</div>
-      </div>
 
-      <div class="form-card">
+        <div class="group-label">Conditions <span class="jp">(条件)</span></div>
+        <div class="chips-rm" id="condChips">
+          ${c.conditions.map(t=>`<span class="chip-rm">${esc(t)} <button type="button" class="chip-x" title="Remove">${SVG.close}</button></span>`).join('')}
+        </div>
+
+        <div class="group-label">Resources</div>
+        <table class="res-table">
+          <thead>
+            <tr><th class="rm"></th><th>Resource Name</th><th>Unit Price</th><th>Quantity</th></tr>
+          </thead>
+          <tbody>
+            ${c.resources.map(r=>resRow(r.n, resPrice(r.n), r.q)).join('')}
+            ${resRowEmpty()}
+          </tbody>
+        </table>
+
+        <div class="divider"></div>
+
         <h3 class="form-section-title">Pricing &amp; Productivity</h3>
         <div class="field">
           <label>Unit Rate <b>($/m³)</b></label>
@@ -638,7 +708,9 @@ function renderEditFull(){
             <button class="clear-btn" data-clear="fProd">${SVG.x}</button>
           </div>
         </div>
+
         <div class="divider"></div>
+
         <div class="field" style="margin-bottom:0;">
           <label>Memo</label>
           <textarea class="input" id="fMemo" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit.">${esc(c.memo)}</textarea>
@@ -659,6 +731,7 @@ function renderEditFull(){
     </div>`;
 
   bindClears();
+  bindEditInteractions();
   $('#eClose').addEventListener('click',()=>{ renderDetails(); });
   $('#eCancel').addEventListener('click',()=>{ renderDetails(); });
   $('#eUpdate').addEventListener('click',saveFull);
@@ -670,18 +743,24 @@ function renderEditFull(){
   $('#emDel').addEventListener('click',()=>{menu.classList.remove('show');openDeleteModal();});
 }
 
+function bindEditInteractions(){
+  drawerContent.querySelectorAll('.chip-x').forEach(b=>b.addEventListener('click',()=>b.closest('.chip-rm').remove()));
+  drawerContent.querySelectorAll('.rm-row').forEach(b=>b.addEventListener('click',()=>b.closest('tr').remove()));
+}
+
 function renderEditRestricted(){
   const c = getCur(currentId);
   drawerContent.innerHTML = `
     <div class="drawer-head">
       <div>
         <h2 class="drawer-title">Edit Construction Unit Rate</h2>
-        <div style="margin-top:6px;"><span class="badge-sim">SCタスクで使用した</span></div>
+        <div style="margin-top:6px;"><span class="badge-sim">Used by Simulation Tasks</span></div>
       </div>
       <button class="icon-btn" id="eClose">${SVG.close}</button>
     </div>
     <div class="drawer-body">
       <div class="form-card">
+        <h3 class="form-section-title">General</h3>
         <div class="field">
           <label>Package Name</label>
           <div class="input-wrap">
@@ -689,7 +768,7 @@ function renderEditRestricted(){
             <button class="clear-btn" data-clear="fName">${SVG.x}</button>
           </div>
         </div>
-        <div class="field">
+        <div class="field" style="margin-bottom:0;">
           <label>Work Type <span class="jp">（工種）</span></label>
           <div class="input-wrap">
             <select class="input select" id="fWork">
@@ -699,30 +778,35 @@ function renderEditRestricted(){
           </div>
         </div>
 
-        <div class="group-label">Conditions <span class="jp">(条件)</span> · Resources · Productivity</div>
-        <div class="ro-tags">
-          ${c.conditions.map(t=>`<span class="ro-tag locked">${esc(t)}</span>`).join('')}
-        </div>
-        <div class="ro-tags">
-          ${c.resources.map(r=>`<span class="ro-tag locked">${esc(r.n)} x ${r.q}</span>`).join('')}
-          <span class="ro-tag locked">Productivity ${c.prod}m³/d</span>
-          <span class="ro-tag locked">Unit Rate $${c.rate}/m³</span>
+        <div class="divider"></div>
+
+        <h3 class="form-section-title">Pricing &amp; Productivity</h3>
+        <div class="field" style="margin-bottom:0;">
+          <label>Unit Rate <b>($/m³)</b></label>
+          <div class="input-wrap">
+            <input class="input" id="fRate" value="$${c.rate}/m³" />
+            <button class="clear-btn" data-clear="fRate">${SVG.x}</button>
+          </div>
         </div>
 
-        <div class="field" style="margin:14px 0 0;">
+        <div class="divider"></div>
+
+        <div class="field" style="margin-bottom:0;">
           <label>Memo</label>
           <textarea class="input" id="fMemo" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit.">${esc(c.memo)}</textarea>
         </div>
       </div>
 
       <div class="warn-box">
-        This Construction Unit Rate is used by Simulation tasks. Resources and productivity cannot be modified. Create a duplicate to make structural changes.
+        この施工単価はシミュレーションタスクで使用されています。<br>
+        リソースおよび生産性は変更できません。<br>
+        構造的な変更を行う場合は、複製を作成してください。
       </div>
     </div>
     <div class="drawer-foot">
       <button class="btn-text" id="eClose2">Close</button>
       <div class="spacer"></div>
-      <button class="btn-outline" id="eDup">複製を作成</button>
+      <button class="btn-outline" id="eDup">Create Duplicate</button>
       <button class="btn-primary" id="eSave">Save</button>
     </div>`;
 
@@ -754,6 +838,7 @@ function saveRestricted(){
   c.name = $('#fName').value.trim() || c.name;
   c.work = $('#fWork').value;
   c.memo = $('#fMemo').value;
+  const r = parseFloat(($('#fRate').value.match(/[\d.]+/)||[])[0]); if(!isNaN(r)) c.rate=r;
   renderGrid(); renderDetails(); drawerMode='details';
   toast('Changes saved');
 }
