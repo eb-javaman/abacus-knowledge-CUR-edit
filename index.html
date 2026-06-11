@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Abacus · Construction Unit Rates</title>
+<title>Abacus · Ongoing Sites (Construction Management)</title>
 <style>
-  /* ---------- Design tokens ---------- */
+  /* ---------- Design tokens (shared with cur.html) ---------- */
   :root{
     --white:#FFFFFF;
     --black:#000000;
@@ -19,26 +19,12 @@
     --indigo-700:#140A94;
     --indigo-800:#0D0765;
     --indigo-900:#07043C;
-    --green-50:#EAFBEB;
-    --green-100:#D0F6D3;
-    --green-200:#A8F0AD;
-    --green-300:#78E880;
-    --green-400:#54635F;
     --green-500:#28D435;
     --green-600:#1FAD29;
-    --green-700:#167E1E;
-    --green-800:#0D5E13;
-    --green-900:#0A330D;
-    --red-50:#FDE8E9;
-    --red-100:#F9C9CB;
-    --red-200:#F5A9AD;
-    --red-300:#F18A8F;
-    --red-400:#ED6B71;
-    --red-500:#E94C53;
-    --red-600:#C53F46;
-    --red-700:#A13239;
-    --red-800:#7E252C;
-    --red-900:#5A181E;
+    --teal-500:#19B5A6;
+    --gold-600:#A8821B;
+    --orange-600:#D98A00;
+    --purple-400:#8F88F0;
 
     --bg-app:#F6F5FD;
     --bg-side:#F1F0FC;
@@ -47,29 +33,14 @@
     --text:#1B1B27;
     --text-soft:#5A5A6E;
     --text-mute:#8A8A9C;
-    --chip-bg:#F1F1F5;
-    --chip-text:#3A3A4A;
-    --danger:#D8202B;
-    --danger-bg:#FDECEC;
-    --warn-bg:#FFF8E6;
-    --warn-line:#F2C94C;
-    --radius:12px;
+    --radius:14px;
     --shadow-card:0 1px 2px rgba(16,16,40,.05);
-    --shadow-card-hover:0 6px 18px rgba(45,36,150,.14);
-    --shadow-drawer:-18px 0 48px rgba(13,7,101,.16);
-    --shadow-modal:0 24px 64px rgba(7,4,60,.28);
     --font:"Inter","Helvetica Neue","Hiragino Sans","Yu Gothic UI",system-ui,-apple-system,sans-serif;
   }
 
   *{box-sizing:border-box;}
   html,body{height:100%;}
-  body{
-    margin:0;
-    font-family:var(--font);
-    color:var(--text);
-    background:var(--bg-app);
-    -webkit-font-smoothing:antialiased;
-  }
+  body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg-app);-webkit-font-smoothing:antialiased;}
   button{font-family:inherit;cursor:pointer;}
 
   /* ---------- App shell ---------- */
@@ -84,7 +55,6 @@
 
   .app{display:flex;min-height:calc(100vh - 62px);}
 
-  /* Sidebar */
   .sidebar{
     width:236px;flex:0 0 236px;
     background:var(--bg-side);
@@ -105,339 +75,64 @@
   }
   .nav-item:hover{background:#EAE9FA;}
   .nav-item.active{
-    background:var(--indigo-50);color:var(--indigo-700);font-weight:600;
-    box-shadow:inset 0 0 0 1px rgba(115,108,237,.25);
+    background:var(--indigo-300);color:var(--white);font-weight:700;
   }
 
-  /* Main */
   .main{flex:1;min-width:0;display:flex;flex-direction:column;}
-  .content{padding:26px 30px 60px;}
-  .page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
-  .page-title{font-size:21px;font-weight:700;color:var(--indigo-700);margin:0;}
-  .btn-primary{
-    background:var(--indigo-500);color:#fff;border:none;border-radius:10px;
-    padding:11px 18px;font-size:14px;font-weight:600;
-  }
-  .btn-primary:hover{background:var(--indigo-600);}
+  .content{padding:22px 26px 60px;}
+  .page-title{font-size:17px;font-weight:600;color:var(--text);margin:0 0 18px;}
 
-  .filters{display:flex;gap:14px;margin-bottom:20px;}
-  .filter{
-    display:flex;align-items:center;gap:8px;
-    background:var(--white);border:1px solid var(--line-strong);border-radius:9px;
-    padding:8px 14px;font-size:14px;color:var(--text);font-weight:600;
-  }
-  .filter svg{width:13px;height:13px;color:var(--text-soft);}
-
-  /* Card grid */
-  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:100%;}
-
-  .card{
+  /* ---------- Site cards ---------- */
+  .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
+  @media(max-width:1100px){.cards{grid-template-columns:1fr;}}
+  .site-card{
     background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
-    padding:16px 18px 18px;box-shadow:var(--shadow-card);cursor:pointer;
-    transition:box-shadow .16s ease,transform .16s ease,border-color .16s ease;
-    position:relative;min-width:0;
+    padding:20px 22px;box-shadow:var(--shadow-card);min-width:0;
   }
-  .card:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-2px);border-color:var(--indigo-100);}
-  .card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
-  .card-name{color:var(--indigo-500);font-weight:700;font-size:16px;}
-  .usage{font-size:12px;color:var(--text-soft);}
-  .usage b{color:var(--text);font-size:13px;}
-  .card-figures{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
-  .price{font-size:22px;font-weight:800;letter-spacing:-.5px;}
-  .price sup{font-size:.6em;}
-  .rate{font-size:18px;font-weight:700;}
-  .rate sup{font-size:.6em;}
-  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
-  .tag{
-    background:var(--chip-bg);color:var(--chip-text);border:1px solid #E4E4EC;
-    border-radius:6px;padding:3px 9px;font-size:12px;line-height:1.4;
-  }
-  .resources{font-size:13px;color:var(--text-soft);line-height:1.6;margin-bottom:14px;}
-  .res-sep{color:var(--line-strong);margin:0 6px;}
-  .card-memo{
-    font-size:13px;color:var(--text-mute);border-top:1px solid var(--line);
-    padding-top:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .card-name-container{display: flex;flex-direction: column; gap: 4px;}
-  .badge-sim{
-    display:inline-flex;align-items:center;gap:5px;
-    background:var(--green-50);color:var(--green-700);
-    font-size:10px;font-weight:600;border-radius:999px;
-    padding:4px 8px; height:auto;
-  }
-  .badge-sim::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green-700);}
+  .sc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+  .sc-name{font-size:21px;font-weight:800;}
+  .sc-meta{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--text-soft);white-space:nowrap;}
+  .sc-meta .updated{display:inline-flex;align-items:center;gap:6px;}
+  .sc-meta svg{width:14px;height:14px;}
+  .status{font-weight:700;font-size:13px;}
+  .status.syncing{color:var(--orange-600);}
+  .status.auto{color:var(--indigo-500);}
 
-  /* ---------- Drawer ---------- */
-  .scrim{
-    position:fixed;inset:0;background:rgba(15,12,45,.34);
-    opacity:0;visibility:hidden;transition:opacity .2s ease;z-index:40;
-  }
-  .scrim.show{opacity:1;visibility:visible;}
+  .metric{margin-bottom:12px;}
+  .metric-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px;}
+  .metric-label{font-size:15px;font-weight:700;}
+  .metric-label.dim{color:var(--text-mute);}
+  .metric-label.dim b{color:var(--text);}
+  .metric-side{font-size:12.5px;color:var(--text-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .track{height:7px;background:#E9E9F0;border-radius:999px;overflow:hidden;}
+  .fill{height:100%;border-radius:999px;background:var(--green-500);}
+  .fill.grad{background:linear-gradient(90deg,var(--green-500),var(--teal-500));}
 
-  .drawer{
-    position:fixed;top:0;right:0;height:100vh;min-height:100vh;width:460px;max-width:94vw;
-    background:var(--white);box-shadow:var(--shadow-drawer);z-index:50;
-    transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);
-    display:flex;flex-direction:column;
+  /* tabs + legend */
+  .sc-tabs{display:flex;align-items:center;gap:4px;margin:16px 0 12px;flex-wrap:wrap;}
+  .tab{
+    background:none;border:none;font-size:14px;font-weight:600;color:var(--text-soft);
+    padding:9px 14px;border-radius:8px 8px 0 0;border-bottom:2.5px solid transparent;
   }
-  .drawer.show{transform:translateX(0);}
-  /* the dynamic content wrapper must itself be the flex column so the body can scroll */
-  #drawerContent{display:flex;flex-direction:column;flex:1;min-height:0;}
-  .drawer-head{
-    display:flex;align-items:flex-start;justify-content:space-between;
-    padding:20px 22px 14px;border-bottom:1px solid var(--line);
+  .tab.active{
+    background:var(--indigo-50);color:var(--text);font-weight:700;
+    border-bottom-color:var(--indigo-500);
   }
-  .drawer-title{font-size:18px;font-weight:700;margin:0;}
-  .drawer-sub{font-size:12px;color:var(--text-mute);margin-top:3px;}
-  .icon-btn{
-    background:none;border:none;color:var(--text-soft);padding:6px;border-radius:8px;
-    display:inline-flex;align-items:center;justify-content:center;
-  }
-  .icon-btn:hover{background:#F0EFFB;color:var(--indigo-600);}
-  .icon-btn svg{width:18px;height:18px;}
-  .drawer-body{padding:20px 22px;overflow-y:auto;flex:1;min-height:0;}
-  .drawer-foot{
-    display:flex;align-items:center;gap:12px;
-    padding:16px 22px;border-top:1px solid var(--line);background:var(--white);
-  }
-  .drawer-foot .spacer{flex:1;}
+  .legend{margin-left:auto;display:flex;align-items:center;gap:16px;font-size:13px;color:var(--text);}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .legend i{display:inline-block;width:18px;height:3px;border-radius:2px;}
 
-  .btn-text{background:none;border:none;color:var(--indigo-500);font-size:14px;font-weight:600;padding:10px 6px;border-radius:8px;}
-  .btn-text:hover{background:#F0EFFB;}
-  .btn-outline{
-    background:#fff;border:1.5px solid var(--indigo-300);color:var(--indigo-600);
-    border-radius:9px;padding:10px 16px;font-size:14px;font-weight:600;
-  }
-  .btn-outline:hover{background:#F4F3FE;}
+  .chart{border:1px solid var(--line);border-radius:8px;padding:8px 6px 2px;}
+  .chart svg{display:block;width:100%;height:auto;}
 
-  /* Details drawer pieces */
-  .pkg-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
-  .pkg-name{font-size:17px;font-weight:700;}
-  .pill-usage{background:var(--indigo-50);color:var(--indigo-700);font-size:12px;font-weight:600;padding:4px 8px;border-radius:999px;}
-  .detail-figures{display:flex;align-items:baseline;gap:18px;color:var(--indigo-500);margin-bottom:12px;}
-  .detail-figures .big{font-size:23px;font-weight:800;}
-  .detail-figures .big sup{font-size:.55em;}
-  .section-label{font-size:14px;font-weight:700;margin:22px 0 10px;}
-  .section-label .muted{font-weight:400;color:var(--text-mute);font-size:12px;margin-left:6px;}
-  .res-btn{
-    display:block;text-align:center;
-    background:#fff;border:1.5px solid var(--line-strong);border-radius:10px;
-    padding:11px;font-size:14px;font-weight:600;color:var(--text);margin:16px auto;
+  .sc-foot{display:flex;gap:14px;margin-top:16px;}
+  .sc-foot button{
+    flex:1;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    background:var(--white);border:1.5px solid var(--line-strong);border-radius:10px;
+    padding:11px 10px;font-size:14px;font-weight:600;color:var(--text);
   }
-  .res-btn:hover{border-color:var(--indigo-300);color:var(--indigo-600);}
-
-  .hist{padding:12px 0;border-bottom:1px solid var(--line);}
-  .hist-top{display:flex;justify-content:space-between;align-items:baseline;}
-  .hist-name{font-weight:700;font-size:14px;}
-  .hist-figs{color:var(--text);font-weight:700;font-size:13px;}
-  .hist-figs span{color:var(--indigo-500);}
-  .hist-meta{font-size:12px;color:var(--text-mute);margin-top:4px;line-height:1.5;}
-  .center{text-align:center;}
-
-  .vr-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;color:var(--text-soft);}
-  .vr-row b{color:var(--text);}
-  .memo-box{
-    background:#FAFAFD;border:1px solid var(--line);border-radius:10px;
-    padding:12px 14px;font-size:13px;color:var(--text-soft);line-height:1.6;margin-top:8px;
-  }
-
-  /* Forms (edit) */
-  .field{margin-bottom:18px;}
-  .field label{display:block;font-size:14px;font-weight:600;margin-bottom:7px;}
-  .field label .jp{color:var(--text-mute);font-weight:400;}
-  .input-wrap{position:relative;}
-  .input{
-    width:100%;border:1.5px solid var(--line-strong);border-radius:10px;
-    padding:12px 38px 12px 14px;font-size:15px;color:var(--text);background:#fff;
-    font-family:inherit;
-  }
-  .input:focus{outline:none;border-color:var(--indigo-400);box-shadow:0 0 0 3px rgba(81,72,234,.14);}
-  .input.select{appearance:none;background:#F3F3F7;cursor:pointer;}
-  textarea.input{resize:vertical;min-height:96px;padding-right:14px;line-height:1.55;}
-  .input-icon{
-    position:absolute;right:12px;top:50%;transform:translateY(-50%);
-    color:var(--text-mute);display:flex;pointer-events:none;
-  }
-  .input-icon svg{width:16px;height:16px;}
-  .clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-mute);padding:4px;border-radius:50%;display:flex;}
-  .clear-btn:hover{color:var(--text);background:#EEE;}
-
-  .form-card{border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px;}
-  .form-section-title{font-size:15px;font-weight:700;margin:0 0 14px;}
-  .form-section-title.mt{margin-top:8px;}
-  .group-label{font-size:14px;font-weight:600;margin:4px 0 8px;}
-  .ro-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
-  .ro-tag{background:var(--chip-bg);border:1px solid #E4E4EC;border-radius:7px;padding:7px 12px;font-size:13px;color:var(--chip-text);}
-  .ro-tag.locked{padding-right:30px;position:relative;}
-  .ro-tag.locked::after{
-    content:"";position:absolute;right:9px;top:50%;transform:translateY(-50%);
-    width:12px;height:12px;background:no-repeat center/contain;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8A9C'%3E%3Cpath d='M12 1a5 5 0 00-5 5v3H6a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2v-9a2 2 0 00-2-2h-1V6a5 5 0 00-5-5zm3 8H9V6a3 3 0 016 0v3z'/%3E%3C/svg%3E");
-  }
-  .divider{height:1px;background:var(--line);margin:18px 0;}
-  .warn-box{
-    background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;
-    padding:13px 15px;font-size:13px;color:#6B5300;line-height:1.6;margin-bottom:8px;
-  }
-
-  /* Removable condition chips (full edit) */
-  .chips-rm{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
-  .chip-rm{
-    display:inline-flex;align-items:center;gap:8px;
-    background:var(--chip-bg);border:1px solid #E4E4EC;border-radius:7px;
-    padding:7px 10px 7px 12px;font-size:13px;color:var(--chip-text);
-  }
-  .chip-rm button{background:none;border:none;cursor:pointer;color:var(--text-mute);display:flex;padding:0;}
-  .chip-rm button:hover{color:var(--text);}
-  .chip-rm svg{width:13px;height:13px;}
-
-  /* Resources table (full edit) */
-  .res-table{
-    width:100%;border-collapse:collapse;font-size:13px;
-    border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;margin-bottom:6px;
-  }
-  .res-table th{
-    background:#F6F6FA;text-align:left;font-weight:700;color:var(--text);
-    padding:11px 12px;border-bottom:1px solid var(--line-strong);
-  }
-  .res-table td{padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--text);}
-  .res-table tr:last-child td{border-bottom:none;}
-  .res-table .rm{width:40px;text-align:center;padding-left:10px;padding-right:0;}
-  .res-table .rm button{background:none;border:none;cursor:pointer;color:var(--text-mute);display:inline-flex;}
-  .res-table .rm button:hover{color:var(--danger);}
-  .res-table .rm svg{width:17px;height:17px;}
-  .res-cell-input{
-    width:100%;border:1.5px solid transparent;border-radius:6px;
-    padding:6px 8px;font-size:13px;font-family:inherit;background:transparent;color:var(--text);
-  }
-  .res-cell-input:focus{outline:none;border-color:var(--indigo-400);background:#fff;box-shadow:0 0 0 3px rgba(81,72,234,.12);}
-  .res-cell-input.muted::placeholder{color:var(--text-mute);}
-
-  /* Locked condition chip (simulation-dependent, e.g. Soil Type) */
-  .chip-lock{
-    display:inline-flex;align-items:center;gap:7px;
-    background:var(--chip-bg);border:1px solid #E4E4EC;border-radius:7px;
-    padding:7px 12px;font-size:13px;color:var(--chip-text);
-  }
-  .chip-lock svg{width:13px;height:13px;color:var(--text-soft);}
-
-  /* Add Conditions button */
-  .btn-add-cond{
-    display:inline-flex;align-items:center;gap:8px;
-    background:#fff;border:1.5px solid var(--line-strong);border-radius:10px;
-    padding:10px 16px;font-size:14px;font-weight:600;color:var(--text);
-    margin-bottom:4px;
-  }
-  .btn-add-cond:hover{border-color:var(--indigo-300);color:var(--indigo-600);}
-  .btn-add-cond svg{width:15px;height:15px;}
-
-  /* Add-resource row inside table */
-  .res-add-row td{padding:11px 12px;}
-  .res-add{
-    display:inline-flex;align-items:center;gap:8px;background:none;border:none;
-    color:var(--indigo-500);font-size:14px;font-weight:600;padding:0;
-  }
-  .res-add:hover{color:var(--indigo-700);}
-  .res-add svg{width:15px;height:15px;}
-
-  /* Computed unit rate display */
-  .rate-display{
-    display:flex;align-items:center;gap:12px;
-    background:#F3F3F7;border-radius:10px;padding:13px 16px;font-size:15px;color:var(--text);
-  }
-  .rate-display .val{flex:1;}
-  .badge-calc{
-    background:var(--green-50);color:var(--green-800);
-    font-size:12px;font-weight:700;border-radius:6px;padding:4px 10px;
-  }
-  .link-override{
-    display:inline-flex;align-items:center;gap:6px;background:none;border:none;
-    color:var(--indigo-500);font-size:13px;font-weight:600;padding:0;
-  }
-  .link-override:hover{color:var(--indigo-700);text-decoration:underline;}
-  .link-override svg{width:14px;height:14px;}
-
-  /* Work Type combobox: free text input + chevron segment + option list */
-  .combo{position:relative;}
-  .combo .input{padding-right:54px;}
-  .combo-toggle{
-    position:absolute;right:1.5px;top:1.5px;bottom:1.5px;width:44px;
-    background:none;border:none;border-left:1.5px solid var(--line-strong);
-    border-radius:0 9px 9px 0;display:flex;align-items:center;justify-content:center;
-    color:var(--indigo-500);
-  }
-  .combo-toggle:hover{background:#F4F3FE;}
-  .combo-toggle svg{width:15px;height:15px;}
-  .combo.open .combo-toggle svg{transform:rotate(180deg);}
-  .combo-list{
-    position:absolute;left:0;right:0;top:calc(100% + 6px);
-    background:#fff;border:1px solid var(--line);border-radius:10px;
-    box-shadow:0 10px 30px rgba(13,7,101,.16);padding:6px;z-index:70;display:none;
-    max-height:220px;overflow-y:auto;
-  }
-  .combo.open .combo-list{display:block;}
-  .combo-opt{
-    display:block;width:100%;text-align:left;background:none;border:none;
-    padding:10px 12px;font-size:14px;border-radius:7px;color:var(--text);
-  }
-  .combo-opt:hover{background:#F4F3FE;}
-  .combo-opt.selected{background:var(--indigo-50);color:var(--indigo-700);font-weight:600;}
-
-  /* More actions menu */
-  .menu{
-    position:absolute;top:48px;right:18px;background:#fff;border:1px solid var(--line);
-    border-radius:10px;box-shadow:0 10px 30px rgba(13,7,101,.18);padding:6px;
-    min-width:150px;z-index:60;display:none;
-  }
-  .menu.show{display:block;}
-  .menu button{
-    display:flex;align-items:center;gap:9px;width:100%;text-align:left;
-    background:none;border:none;padding:10px 12px;font-size:14px;border-radius:7px;color:var(--text);
-  }
-  .menu button:hover{background:#F4F3FE;}
-  .menu button.danger{color:var(--danger);}
-  .menu button.danger:hover{background:var(--danger-bg);}
-  .menu button svg{width:16px;height:16px;}
-  .menu button[disabled]{color:var(--text-mute);cursor:not-allowed;}
-  .menu button[disabled]:hover{background:none;}
-  .menu-note{font-size:11px;color:var(--text-mute);padding:2px 12px 8px;line-height:1.4;}
-
-  /* Modal */
-  .modal-scrim{
-    position:fixed;inset:0;background:rgba(15,12,45,.45);
-    display:none;align-items:center;justify-content:center;z-index:80;padding:20px;
-  }
-  .modal-scrim.show{display:flex;}
-  .modal{
-    background:#fff;border-radius:16px;box-shadow:var(--shadow-modal);
-    width:520px;max-width:100%;padding:26px 28px 28px;
-    animation:pop .18s ease;
-  }
-  @keyframes pop{from{transform:scale(.96);opacity:0;}to{transform:scale(1);opacity:1;}}
-  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
-  .modal-title{font-size:22px;font-weight:800;margin:0;}
-  .modal-body{
-    border:1px solid var(--line);border-radius:12px;padding:30px 22px;
-    text-align:center;color:var(--text-soft);font-size:15px;line-height:1.7;
-  }
-  .modal-actions{display:flex;justify-content:center;gap:14px;margin-top:24px;}
-  .btn-cancel{background:#fff;border:1.5px solid var(--line-strong);border-radius:10px;padding:11px 26px;font-size:15px;font-weight:600;color:var(--text);}
-  .btn-cancel:hover{background:#F4F4F8;}
-  .btn-confirm{background:var(--indigo-500);color:#fff;border:none;border-radius:10px;padding:11px 28px;font-size:15px;font-weight:700;}
-  .btn-confirm:hover{background:var(--indigo-600);}
-  .btn-danger{background:var(--danger);color:#fff;border:none;border-radius:10px;padding:11px 28px;font-size:15px;font-weight:700;}
-  .btn-danger:hover{background:#B81820;}
-
-  /* toast */
-  .toast{
-    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:var(--indigo-700);color:#fff;padding:12px 20px;border-radius:10px;
-    font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(7,4,60,.35);
-    opacity:0;visibility:hidden;transition:all .25s ease;z-index:90;
-  }
-  .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
-
-  .hidden{display:none !important;}
+  .sc-foot button:hover{border-color:var(--indigo-300);color:var(--indigo-600);}
+  .sc-foot svg{width:16px;height:16px;}
 </style>
 </head>
 <body>
@@ -458,15 +153,15 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         Sites
       </div>
-      <a class="nav-item">Ongoing Sites</a>
-      <a href="planning.html" class="nav-item">Planning Sites</a>
+      <a href="index.html" class="nav-item active">Ongoing Sites</a>
+      <a href="PlanningSitelist.html" class="nav-item">Planning Sites</a>
     </div>
     <div class="nav-group">
       <div class="nav-head">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
         Knowledge
       </div>
-      <a class="nav-item active">Construction Unit Rates</a>
+      <a href="cur.html" class="nav-item">Construction Unit Rates</a>
       <a class="nav-item">Resource Unit Price</a>
       <a class="nav-item">Past Sites</a>
     </div>
@@ -475,661 +170,159 @@
   <!-- Main -->
   <div class="main">
     <main class="content">
-      <div class="page-head">
-        <h1 class="page-title">Construction Unit Rates</h1>
-        <button class="btn-primary" id="newBtn">New Construction Unit Rate</button>
-      </div>
-      <div class="filters">
-        <div class="filter">Work Type
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
-        </div>
-        <div class="filter">Soil Type
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
-        </div>
-      </div>
-      <div class="grid" id="cardGrid"></div>
+      <h1 class="page-title">Ongoing Sites (Construction Management)</h1>
+      <div class="cards" id="cards"></div>
     </main>
   </div>
 </div>
 
-<!-- Drawer -->
-<div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer" aria-hidden="true">
-  <div id="drawerContent"></div>
-</aside>
-
-<!-- Modals -->
-<div class="modal-scrim" id="modalScrim">
-  <div class="modal" id="modalBox"></div>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
 <script>
-/* =====================================================================
-   DATA
-===================================================================== */
-const SVG = {
-  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>',
-  dots:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>',
-  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>',
-  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
-  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>',
-  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
-  lock:'<svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px;"><path d="M12 1a5 5 0 00-5 5v3H6a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2v-9a2 2 0 00-2-2h-1V6a5 5 0 00-5-5zm3 8H9V6a3 3 0 016 0v3z"/></svg>'
+const ICON = {
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>',
+  bars:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 20V10M12 20V4M19 20v-6"/><path d="M3 20h18"/></svg>'
 };
 
-let CURS = [
-  {
-    id:'pkg-001', name:'Package_001', work:'盛土工', usage:30, rate:26, prod:650,
-    conditions:['照土工','地盤条件','気温','高低差10m'],
-    resources:[{n:'Shovel',q:1},{n:'Backhoe',q:2},{n:'Operator',q:12},{n:'bulldozer',q:2}],
-    resShort:'Shovel ① | Dump Truck ② | Operator ③ | Bulldozer ①',
-    memo:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna at elementum tempus, magna lorem tincidunt dolor, sed aliquam lectus augue vitae mauris.',
-    halUnit:'Narrow', halAmount:'Moderate', usedBySim:true,
-    history:[
-      {site:'Site A',rate:10,prod:650,period:'2026/01/10〜2026/04/20',days:45,detail:'盛土工, XXXX, XXX',res:'Shovel(3), Dump(2)'},
-      {site:'Site B',rate:15,prod:700,period:'2026/01/10〜2026/04/20',days:35,detail:'盛土工, XXXX, XXX',res:'Shovel(3), Bulldozer(1), Dump(2)'},
-      {site:'Site C',rate:26,prod:800,period:'2026/01/10〜2026/04/20',days:30,detail:'盛土工, XXXX, XXX',res:'Shovel(3), Bulldozer(1), Dump(2)'}
-    ]
-  },
-  {
-    id:'pkg-002', name:'Package_002', work:'掘削工', usage:18, rate:26, prod:650,
-    conditions:['照土工','Ground Type','Temp','高低差10m'],
-    resources:[{n:'Shovel',q:2},{n:'Dump Truck',q:2},{n:'Operator',q:3},{n:'Bulldozer',q:1}],
-    resShort:'Shovel ② | Dump Truck ② | Operator ③ | Bulldozer ①',
-    memo:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod tempus.',
-    halUnit:'Moderate', halAmount:'Wide', usedBySim:false,
-    history:[
-      {site:'Site D',rate:22,prod:600,period:'2025/09/01〜2025/12/10',days:40,detail:'掘削工, XXXX',res:'Shovel(2), Dump(2)'}
-    ]
-  }
-];
-// generate filler cards (alternating states) to fill the grid
-const fillerStates = [true,false,false,true,false,true,false,false];
-fillerStates.forEach((sim,i)=>{
-  CURS.push({
-    id:'pkg-'+String(i+3).padStart(3,'0'),
-    name:'Package_'+String(i+3).padStart(3,'0'),
-    work: sim?'盛土工':'掘削工', usage:30, rate:26, prod:650,
-    conditions:['照土工','Ground Type','Temp','高低差10m'],
-    resources:[{n:'Shovel',q:2},{n:'Dump Truck',q:2},{n:'Operator',q:3},{n:'Bulldozer',q:1}],
-    resShort:'Shovel ② | Dump Truck ② | Operator ③ | Bulldozer ①',
-    memo:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna at elementum tempus.',
-    halUnit:'Narrow', halAmount:'Moderate', usedBySim:sim,
-    history:[{site:'Site X',rate:20,prod:650,period:'2025/06/01〜2025/09/10',days:30,detail:'XXXX',res:'Shovel(2), Dump(2)'}]
-  });
-});
+/* ---------- chart builders (static prototype data) ---------- */
+const MONTHS = ['25年1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
-/* =====================================================================
-   STATE
-===================================================================== */
-let currentId = null;       // CUR being viewed/edited
-let drawerMode = 'details'; // 'details' | 'edit-full' | 'edit-restricted'
-
-const $ = sel => document.querySelector(sel);
-const drawer = $('#drawer');
-const scrim = $('#scrim');
-const drawerContent = $('#drawerContent');
-const modalScrim = $('#modalScrim');
-const modalBox = $('#modalBox');
-
-const getCur = id => CURS.find(c=>c.id===id);
-const esc = s => String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-
-/* =====================================================================
-   CARD GRID
-===================================================================== */
-function renderGrid(){
-  const grid = $('#cardGrid');
-  grid.innerHTML = CURS.map(c=>`
-    <div class="card" data-id="${c.id}">
-      <div class="card-top">
-        <div class="card-name-container">
-          <div class="card-name">${esc(c.name)}</div>
-          ${c.usedBySim?'<div class="badge-sim">SCタスクで使用した</div>':''}
-        </div>
-        <div class="usage">利用現場数：<b>${c.usage}</b></div>
-      </div>
-      <div class="card-figures">
-        <div class="price">$${c.rate}<sup>/m³</sup></div>
-        <div class="rate">${c.prod}<sup>m³</sup>/Day</div>
-      </div>
-      <div class="tags">${c.conditions.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
-      <div class="resources">${c.resShort}</div>
-      <div class="card-memo">${esc(c.memo)}</div>
-    </div>`).join('');
-  grid.querySelectorAll('.card').forEach(el=>{
-    el.addEventListener('click',()=>openDetails(el.dataset.id));
-  });
-}
-
-/* =====================================================================
-   DRAWER OPEN / CLOSE
-===================================================================== */
-function openDrawer(){ scrim.classList.add('show'); drawer.classList.add('show'); drawer.setAttribute('aria-hidden','false'); }
-function closeDrawer(){ scrim.classList.remove('show'); drawer.classList.remove('show'); drawer.setAttribute('aria-hidden','true'); currentId=null; }
-scrim.addEventListener('click',closeDrawer);
-
-/* =====================================================================
-   DETAILS VIEW
-===================================================================== */
-function openDetails(id){
-  currentId = id; drawerMode='details';
-  renderDetails();
-  openDrawer();
-}
-
-function renderDetails(){
-  const c = getCur(currentId);
-  drawerContent.innerHTML = `
-    <div class="drawer-head">
-      <h2 class="drawer-title">Construction Unit Rate Details</h2>
-      <div style="display:flex;gap:2px;position:relative;">
-        <button class="icon-btn" title="Edit" id="dEdit">${SVG.edit}</button>
-        <button class="icon-btn" title="More actions" id="dMore">${SVG.dots}</button>
-        <button class="icon-btn" title="Close" id="dClose">${SVG.close}</button>
-        <div class="menu" id="dMenu">
-          <button id="mDup">${SVG.copy} Duplicate</button>
-          ${c.usedBySim
-            ? `<button disabled>${SVG.trash} Delete</button>
-               <div class="menu-note">Used by Simulation tasks — cannot be deleted.</div>`
-            : `<button class="danger" id="mDel">${SVG.trash} Delete</button>`}
-        </div>
-      </div>
-    </div>
-    <div class="drawer-body">
-      <div class="pkg-row">
-        <span class="pkg-name">${esc(c.name)}</span>
-        <span class="pill-usage">利用現場数: ${c.usage}</span>
-        ${c.usedBySim?'<span class="badge-sim">SCタスクで使用した</span>':''}
-      </div>
-      <div class="detail-figures">
-        <span class="big">${c.rate}$<sup>/m³</sup></span>
-        <span class="big">${c.prod}<sup>m³</sup>/Day</span>
-      </div>
-      <div class="tags">${c.conditions.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
-      <button class="res-btn">Resources Details</button>
-
-      <div class="section-label">Usage History <span class="muted">(TOP3)</span></div>
-      ${c.history.slice(0,3).map((h,i)=>`
-        <div class="hist">
-          <div class="hist-top">
-            <div class="hist-name">${i+1}. ${esc(h.site)}</div>
-            <div class="hist-figs"><span>${h.rate}$/m³</span> &nbsp; ${h.prod}m³/D</div>
-          </div>
-          <div class="hist-meta">Period: ${h.period} &nbsp; Working Days: ${h.days}<br>${esc(h.detail)}<br>${esc(h.res)}</div>
-        </div>`).join('')}
-      <div class="center"><button class="res-btn" style="margin-top:14px;">View All Records</button></div>
-
-      <div class="section-label">Variance <span class="muted">Construction Unit Rate Fluctuation (過去現場)</span></div>
-      <div class="vr-row"><span>HAL Range（Unit Rate）</span><b>${c.halUnit}</b></div>
-      <div class="vr-row"><span>HAL Range（Construction Amount）</span><b>${c.halAmount}</b></div>
-
-      <div class="section-label">memo：</div>
-      <div class="memo-box">${esc(c.memo)}</div>
-    </div>`;
-
-  $('#dClose').addEventListener('click',closeDrawer);
-  $('#dEdit').addEventListener('click',openEdit);
-  const menu = $('#dMenu');
-  $('#dMore').addEventListener('click',e=>{e.stopPropagation();menu.classList.toggle('show');});
-  document.addEventListener('click',()=>menu.classList.remove('show'));
-  menu.addEventListener('click',e=>e.stopPropagation());
-  $('#mDup').addEventListener('click',()=>{menu.classList.remove('show');openDuplicateModal();});
-  if($('#mDel')) $('#mDel').addEventListener('click',()=>{menu.classList.remove('show');openDeleteModal();});
-}
-
-/* =====================================================================
-   EDIT VIEW  (full / restricted based on usedBySim)
-===================================================================== */
-function openEdit(){
-  const c = getCur(currentId);
-  drawerMode = c.usedBySim ? 'edit-restricted' : 'edit-full';
-  c.usedBySim ? renderEditRestricted() : renderEditFull();
-}
-
-const WORK_TYPES = ['盛土工','掘削工','Earthwork','aaa'];
-
-function comboField(id, value){
-  return `
-    <div class="combo" id="${id}Combo">
-      <input class="input" id="${id}" value="${esc(value)}" autocomplete="off" />
-      <button type="button" class="combo-toggle" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="combo-list">
-        ${WORK_TYPES.map(w=>`<button type="button" class="combo-opt ${w===value?'selected':''}" data-val="${esc(w)}">${esc(w)}</button>`).join('')}
-      </div>
-    </div>`;
-}
-
-function bindCombo(id){
-  const combo = $('#'+id+'Combo');
-  if(!combo) return;
-  const input = combo.querySelector('.input');
-  const toggle = combo.querySelector('.combo-toggle');
-  toggle.addEventListener('click',e=>{
-    e.stopPropagation();
-    combo.classList.toggle('open');
-    if(combo.classList.contains('open')) input.focus();
-  });
-  combo.querySelectorAll('.combo-opt').forEach(o=>o.addEventListener('click',()=>{
-    input.value = o.dataset.val;
-    combo.querySelectorAll('.combo-opt').forEach(x=>x.classList.toggle('selected',x===o));
-    combo.classList.remove('open');
-  }));
-  input.addEventListener('focus',()=>combo.classList.add('open'));
-  input.addEventListener('input',()=>combo.classList.add('open'));
-  document.addEventListener('click',e=>{ if(!combo.contains(e.target)) combo.classList.remove('open'); });
-}
-
-const RES_PRICE = {
-  'Shovel':'$45/h','Backhoe':'$60/h','Operator':'$32.21/h','Operator (Skilled)':'$32.21/h',
-  'bulldozer':'$77/h','Bulldozer':'$77/h','Dump Truck':'$57.98/h'
-};
-const resPrice = name => RES_PRICE[name] || '--';
-
-function resRow(name, price, qty){
-  return `
-    <tr>
-      <td class="rm"><button type="button" class="rm-row" title="Remove">${SVG.x}</button></td>
-      <td>${esc(name)}</td>
-      <td><input class="res-cell-input" value="${esc(price)}" /></td>
-      <td><input class="res-cell-input" style="width:56px" value="${esc(qty)}" /></td>
-    </tr>`;
-}
-function resRowEmpty(){
-  return `
-    <tr>
-      <td class="rm"><button type="button" class="rm-row" title="Remove">${SVG.x}</button></td>
-      <td><input class="res-cell-input muted" placeholder="--" /></td>
-      <td><input class="res-cell-input muted" placeholder="--" /></td>
-      <td><input class="res-cell-input muted" placeholder="--" style="width:56px" /></td>
-    </tr>`;
-}
-
-function renderEditFull(){
-  const c = getCur(currentId);
-  drawerContent.innerHTML = `
-    <div class="drawer-head">
-      <div>
-        <h2 class="drawer-title">Edit Construction Unit Rate</h2>
-        <div class="drawer-sub">Customize which columns are visible in your execution budget views.</div>
-      </div>
-      <button class="icon-btn" id="eClose">${SVG.close}</button>
-    </div>
-    <div class="drawer-body">
-      <div class="form-card">
-        <h3 class="form-section-title">General</h3>
-        <div class="field">
-          <label>Package Name</label>
-          <div class="input-wrap">
-            <input class="input" id="fName" value="${esc(c.name)}" />
-            <button class="clear-btn" data-clear="fName">${SVG.x}</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Work Type <span class="jp">（工種）</span></label>
-          ${comboField('fWork', c.work)}
-        </div>
-
-        <div class="group-label">Conditions <span class="jp">(条件)</span></div>
-        <div class="chips-rm" id="condChips">
-          ${c.conditions.map(t=>`<span class="chip-rm">${esc(t)} <button type="button" class="chip-x" title="Remove">${SVG.close}</button></span>`).join('')}
-          <span class="chip-lock"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a5 5 0 00-5 5v3H6a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2v-9a2 2 0 00-2-2h-1V6a5 5 0 00-5-5zm3 8H9V6a3 3 0 016 0v3z"/></svg> Soil Type: Sandy</span>
-        </div>
-        <button type="button" class="btn-add-cond" id="addCond">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          Add Conditions
-        </button>
-
-        <div class="divider"></div>
-
-        <h3 class="form-section-title">Resources</h3>
-        <table class="res-table">
-          <thead>
-            <tr><th class="rm"></th><th>Resource Name</th><th>Unit Price</th><th>Quantity</th></tr>
-          </thead>
-          <tbody id="resBody">
-            ${c.resources.map(r=>resRow(r.n, resPrice(r.n), r.q)).join('')}
-            <tr class="res-add-row">
-              <td colspan="4">
-                <button type="button" class="res-add" id="addRes">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-                  Resources追加
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="divider"></div>
-
-        <h3 class="form-section-title">Pricing &amp; Productivity</h3>
-        <div class="field">
-          <label>Unit Rate <b>($/m³)</b></label>
-          <div class="rate-display" id="rateDisplay">
-            <span class="val">$${c.rate}/m³</span>
-            <span class="badge-calc">計算した</span>
-            <button type="button" class="link-override" id="rateOverride">${SVG.edit} 上書きする</button>
-          </div>
-          <div class="input-wrap hidden" id="rateInputWrap">
-            <input class="input" id="fRate" value="$${c.rate}/m³" />
-            <button class="clear-btn" data-clear="fRate">${SVG.x}</button>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:6px;">
-          <label>Productivity <b>(m³/d)</b></label>
-          <div class="input-wrap">
-            <input class="input" id="fProd" value="${c.prod}m³/d" />
-            <button class="clear-btn" data-clear="fProd">${SVG.x}</button>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="field" style="margin-bottom:0;">
-          <label>Memo</label>
-          <textarea class="input" id="fMemo" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit.">${esc(c.memo)}</textarea>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-foot">
-      <div style="position:relative;">
-        <button class="btn-outline" id="eMore">more actions</button>
-        <div class="menu" id="eMenu" style="top:auto;bottom:48px;right:auto;left:0;">
-          <button id="emDup">${SVG.copy} Duplicate</button>
-          <button class="danger" id="emDel">${SVG.trash} Delete</button>
-        </div>
-      </div>
-      <div class="spacer"></div>
-      <button class="btn-text" id="eCancel">cancel</button>
-      <button class="btn-primary" id="eUpdate">save</button>
-    </div>`;
-
-  bindClears();
-  bindCombo('fWork');
-  bindEditInteractions();
-  $('#eClose').addEventListener('click',()=>{ renderDetails(); });
-  $('#eCancel').addEventListener('click',()=>{ renderDetails(); });
-  $('#eUpdate').addEventListener('click',saveFull);
-  const menu = $('#eMenu');
-  $('#eMore').addEventListener('click',e=>{e.stopPropagation();menu.classList.toggle('show');});
-  document.addEventListener('click',()=>menu.classList.remove('show'));
-  menu.addEventListener('click',e=>e.stopPropagation());
-  $('#emDup').addEventListener('click',()=>{menu.classList.remove('show');openDuplicateModal();});
-  $('#emDel').addEventListener('click',()=>{menu.classList.remove('show');openDeleteModal();});
-}
-
-function bindEditInteractions(){
-  // chip / row removal (delegated so newly added items work too; bound once)
-  if(!drawerContent.dataset.editDelegated){
-    drawerContent.dataset.editDelegated = '1';
-    drawerContent.addEventListener('click',e=>{
-      const x = e.target.closest('.chip-x');
-      if(x){ x.closest('.chip-rm').remove(); return; }
-      const rm = e.target.closest('.rm-row');
-      if(rm){ rm.closest('tr').remove(); return; }
-    });
-  }
-
-  // + Add Conditions → append a removable chip before the locked one
-  const addCond = $('#addCond');
-  if(addCond) addCond.addEventListener('click',()=>{
-    const chips = $('#condChips');
-    const n = chips.querySelectorAll('.chip-rm').length + 1;
-    const span = document.createElement('span');
-    span.className = 'chip-rm';
-    span.innerHTML = `item${String(n).padStart(2,'0')} <button type="button" class="chip-x" title="Remove">${SVG.close}</button>`;
-    chips.insertBefore(span, chips.querySelector('.chip-lock'));
-  });
-
-  // + Resources追加 → insert an empty editable row above the add-row
-  const addRes = $('#addRes');
-  if(addRes) addRes.addEventListener('click',()=>{
-    const addRow = addRes.closest('tr');
-    addRow.insertAdjacentHTML('beforebegin', resRowEmpty());
-    const newRow = addRow.previousElementSibling;
-    newRow.querySelector('.res-cell-input')?.focus();
-  });
-
-  // 上書きする → swap computed display for an editable input
-  const ov = $('#rateOverride');
-  if(ov) ov.addEventListener('click',()=>{
-    $('#rateDisplay').classList.add('hidden');
-    $('#rateInputWrap').classList.remove('hidden');
-    const inp = $('#fRate'); inp.focus(); inp.select();
-  });
-}
-
-function renderEditRestricted(){
-  const c = getCur(currentId);
-  drawerContent.innerHTML = `
-    <div class="drawer-head">
-      <div>
-        <h2 class="drawer-title">Edit Construction Unit Rate</h2>
-        <div style="margin-top:6px;"><span class="badge-sim">Used by Simulation Tasks</span></div>
-      </div>
-      <button class="icon-btn" id="eClose">${SVG.close}</button>
-    </div>
-    <div class="drawer-body">
-      <div class="form-card">
-        <h3 class="form-section-title">General</h3>
-        <div class="field">
-          <label>Package Name</label>
-          <div class="input-wrap">
-            <input class="input" id="fName" value="${esc(c.name)}" />
-            <button class="clear-btn" data-clear="fName">${SVG.x}</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Work Type <span class="jp">（工種）</span></label>
-          ${comboField('fWork', c.work)}
-        </div>
-
-        <div class="group-label">Conditions <span class="jp">(条件)</span></div>
-        <div class="chips-rm">
-          ${c.conditions.map(t=>`<span class="chip-lock">${SVG.lock} ${esc(t)}</span>`).join('')}
-          <span class="chip-lock">${SVG.lock} Soil Type: Sandy</span>
-        </div>
-
-        <div class="divider"></div>
-
-        <h3 class="form-section-title">Resources</h3>
-        <table class="res-table">
-          <thead>
-            <tr><th class="rm"></th><th>Resource Name</th><th>Unit Price</th><th>Quantity</th></tr>
-          </thead>
-          <tbody>
-            ${c.resources.map(r=>`
-            <tr>
-              <td class="rm"><span style="display:inline-flex;color:var(--text-mute);">${SVG.lock}</span></td>
-              <td>${esc(r.n)}</td>
-              <td>${esc(resPrice(r.n))}</td>
-              <td>${r.q}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-
-        <div class="divider"></div>
-
-        <h3 class="form-section-title">Pricing &amp; Productivity</h3>
-        <div class="field">
-          <label>Unit Rate <b>($/m³)</b></label>
-          <div class="rate-display">
-            <span class="val">$${c.rate}/m³</span>
-            <span class="badge-calc">計算した</span>
-            <span style="display:inline-flex;color:var(--text-mute);">${SVG.lock}</span>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <label>Productivity <b>(m³/d)</b></label>
-          <div class="rate-display">
-            <span class="val">${c.prod}m³/d</span>
-            <span style="display:inline-flex;color:var(--text-mute);">${SVG.lock}</span>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="field" style="margin-bottom:0;">
-          <label>Memo</label>
-          <textarea class="input" id="fMemo" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit.">${esc(c.memo)}</textarea>
-        </div>
-      </div>
-
-      <div class="warn-box">
-        この施工単価はシミュレーションタスクで使用されています。<br>
-        リソースおよび生産性は変更できません。<br>
-        構造的な変更を行う場合は、複製を作成してください。
-      </div>
-    </div>
-    <div class="drawer-foot">
-      <button class="btn-outline" id="eDup">Create Duplicate</button>
-      <div class="spacer"></div>
-      <button class="btn-text" id="eClose2">Cancel</button>
-      <button class="btn-primary" id="eSave">Save</button>
-    </div>`;
-
-  bindClears();
-  bindCombo('fWork');
-  $('#eClose').addEventListener('click',renderDetails);
-  $('#eClose2').addEventListener('click',renderDetails);
-  $('#eDup').addEventListener('click',openDuplicateModal);
-  $('#eSave').addEventListener('click',saveRestricted);
-}
-
-function bindClears(){
-  drawerContent.querySelectorAll('.clear-btn').forEach(b=>{
-    b.addEventListener('click',()=>{ const t=$('#'+b.dataset.clear); if(t){t.value='';t.focus();} });
-  });
-}
-
-function saveFull(){
-  const c = getCur(currentId);
-  c.name = $('#fName').value.trim() || c.name;
-  c.work = $('#fWork').value;
-  c.memo = $('#fMemo').value;
-  const r = parseFloat(($('#fRate').value.match(/[\d.]+/)||[])[0]); if(!isNaN(r)) c.rate=r;
-  const p = parseFloat(($('#fProd').value.match(/[\d.]+/)||[])[0]); if(!isNaN(p)) c.prod=p;
-  renderGrid(); renderDetails(); drawerMode='details';
-  toast('Construction Unit Rate updated');
-}
-function saveRestricted(){
-  const c = getCur(currentId);
-  c.name = $('#fName').value.trim() || c.name;
-  c.work = $('#fWork').value;
-  c.memo = $('#fMemo').value;
-  renderGrid(); renderDetails(); drawerMode='details';
-  toast('Changes saved');
-}
-
-/* =====================================================================
-   MODALS
-===================================================================== */
-function showModal(){ modalScrim.classList.add('show'); }
-function hideModal(){ modalScrim.classList.remove('show'); }
-modalScrim.addEventListener('click',e=>{ if(e.target===modalScrim) hideModal(); });
-
-function openDuplicateModal(){
-  modalBox.innerHTML = `
-    <div class="modal-head">
-      <h2 class="modal-title">Duplicate Construction Unit Rate?</h2>
-      <button class="icon-btn" id="modClose">${SVG.close}</button>
-    </div>
-    <div class="modal-body">
-      A copy will be created. The copy can be edited<br>without affecting existing Simulation tasks.
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="modCancel">Cancel</button>
-      <button class="btn-confirm" id="modDup">Duplicate</button>
-    </div>`;
-  showModal();
-  $('#modClose').addEventListener('click',hideModal);
-  $('#modCancel').addEventListener('click',hideModal);
-  $('#modDup').addEventListener('click',confirmDuplicate);
-}
-
-function confirmDuplicate(){
-  const src = getCur(currentId);
-  const n = CURS.length+1;
-  const copy = JSON.parse(JSON.stringify(src));
-  copy.id = 'pkg-copy-'+n;
-  copy.name = src.name + ' (Copy)';
-  copy.usedBySim = false;   // copy is treated as unused
-  copy.usage = 0;
-  copy.history = [];
-  CURS.unshift(copy);
-  hideModal();
-  renderGrid();
-  // open copy in full edit mode
-  currentId = copy.id;
-  drawerMode = 'edit-full';
-  renderEditFull();
-  openDrawer();
-  toast('Copy created — now editing the duplicate');
-}
-
-function openDeleteModal(){
-  modalBox.innerHTML = `
-    <div class="modal-head">
-      <h2 class="modal-title">Confirm deletion</h2>
-      <button class="icon-btn" id="modClose">${SVG.close}</button>
-    </div>
-    <div class="modal-body">
-      This action cannot be undone.<br>Confirm to delete this Construction Unit Rate.
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="modCancel">Cancel</button>
-      <button class="btn-danger" id="modDel">Confirm</button>
-    </div>`;
-  showModal();
-  $('#modClose').addEventListener('click',hideModal);
-  $('#modCancel').addEventListener('click',hideModal);
-  $('#modDel').addEventListener('click',confirmDelete);
-}
-
-function confirmDelete(){
-  CURS = CURS.filter(c=>c.id!==currentId);
-  hideModal();
-  closeDrawer();
-  renderGrid();
-  toast('Construction Unit Rate deleted');
-}
-
-/* =====================================================================
-   NEW (reuse full edit on a blank record)
-===================================================================== */
-$('#newBtn').addEventListener('click',()=>{
-  const blank = {
-    id:'pkg-new-'+(CURS.length+1), name:'New Package', work:'盛土工', usage:0, rate:0, prod:0,
-    conditions:['—'], resources:[{n:'Shovel',q:1}], resShort:'Shovel ①',
-    memo:'', halUnit:'Narrow', halAmount:'Narrow', usedBySim:false, history:[]
+function lineChart(){
+  // plot area: x 56..780, y 18..196 (0% bottom .. 100% top)
+  const xs = i => 56 + i * 62;
+  const pts = {
+    purple:[190,158,126,98,76,60,48,40],
+    green: [190,162,136,110,90,78,71,70],
+    gold:  [190,166,146,124,108,97,89,83]
   };
-  CURS.unshift(blank);
-  renderGrid();
-  currentId = blank.id; drawerMode='edit-full';
-  renderEditFull(); openDrawer();
-});
-
-/* =====================================================================
-   TOAST
-===================================================================== */
-let toastTimer;
-function toast(msg){
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'),2200);
+  const poly = (arr,color)=>`
+    <polyline points="${arr.map((y,i)=>`${xs(i)},${y}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+    ${arr.map((y,i)=>`<circle cx="${xs(i)}" cy="${y}" r="3.4" fill="${color}"/>`).join('')}`;
+  return `
+  <svg viewBox="0 0 800 238" xmlns="http://www.w3.org/2000/svg">
+    ${[196,107,18].map(y=>`<line x1="50" y1="${y}" x2="790" y2="${y}" stroke="#ECECF2" stroke-dasharray="${y===196?'none':'4 4'}"/>`).join('')}
+    <text x="42" y="22" font-size="13" fill="#5A5A6E" text-anchor="end">100%</text>
+    <text x="42" y="111" font-size="13" fill="#5A5A6E" text-anchor="end">50%</text>
+    <text x="42" y="200" font-size="13" fill="#5A5A6E" text-anchor="end">0%</text>
+    ${poly(pts.gold,'var(--gold-600)')}
+    ${poly(pts.green,'var(--green-600)')}
+    ${poly(pts.purple,'var(--purple-400)')}
+    ${MONTHS.map((m,i)=>{
+      const x = xs(i);
+      if(m==='6月') return `<rect x="${x-22}" y="212" width="44" height="22" rx="11" fill="#E2E2EA"/><text x="${x}" y="227" font-size="13" fill="#1B1B27" text-anchor="middle">6月</text>`;
+      return `<text x="${x}" y="227" font-size="13" fill="#5A5A6E" text-anchor="middle">${m}</text>`;
+    }).join('')}
+  </svg>`;
 }
 
-/* Esc to close */
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ if(modalScrim.classList.contains('show')) hideModal(); else if(drawer.classList.contains('show')) closeDrawer(); }
-});
+function barChart(){
+  // 7 months, dual axis; plot area x 80..720, y 18..196
+  const months = ['25年1月','2月','3月','4月','5月','6月','7月'];
+  const xs = i => 110 + i * 100;
+  const bars = [10,38,28,30,52,80,46]; // % heights; plus tall final bar
+  const line = [128,118,110,104,98,92];
+  return `
+  <svg viewBox="0 0 800 238" xmlns="http://www.w3.org/2000/svg">
+    ${[196,107,18].map(y=>`<line x1="72" y1="${y}" x2="728" y2="${y}" stroke="#ECECF2" stroke-dasharray="${y===196?'none':'4 4'}"/>`).join('')}
+    <text x="64" y="22" font-size="13" fill="#5A5A6E" text-anchor="end">¥2000万</text>
+    <text x="64" y="111" font-size="13" fill="#5A5A6E" text-anchor="end">¥1000万</text>
+    <text x="64" y="200" font-size="13" fill="#5A5A6E" text-anchor="end">¥0</text>
+    <text x="736" y="22" font-size="13" fill="#5A5A6E">¥500万</text>
+    <text x="736" y="111" font-size="13" fill="#5A5A6E">¥250万</text>
+    <text x="736" y="200" font-size="13" fill="#5A5A6E">¥0</text>
+    <defs>
+      <linearGradient id="barG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9A9DA8"/><stop offset="1" stop-color="#C9CBD3"/>
+      </linearGradient>
+    </defs>
+    ${bars.map((h,i)=>{
+      const bh = h*1.78, x = xs(i)-17;
+      return `<rect x="${x}" y="${196-bh}" width="34" height="${bh}" fill="url(#barG)"/>`;
+    }).join('')}
+    <rect x="${xs(5)+33}" y="${196-140}" width="34" height="140" fill="url(#barG)"/>
+    <polyline points="${line.map((y,i)=>`${xs(i)},${y}`).join(' ')}" fill="none" stroke="var(--purple-400)" stroke-width="2.5"/>
+    ${line.map((y,i)=>`<circle cx="${xs(i)}" cy="${y}" r="3.4" fill="var(--purple-400)"/>`).join('')}
+    ${months.map((m,i)=>{
+      const x = xs(i);
+      if(m==='6月') return `<rect x="${x-22}" y="212" width="44" height="22" rx="11" fill="#1B1B27"/><text x="${x}" y="227" font-size="13" fill="#fff" text-anchor="middle">6月</text>`;
+      return `<text x="${x}" y="227" font-size="13" fill="#5A5A6E" text-anchor="middle">${m}</text>`;
+    }).join('')}
+  </svg>`;
+}
 
-/* init */
-renderGrid();
+/* ---------- card template ---------- */
+function siteCard(cfg){
+  const legendFull = `
+    <div class="legend">
+      <span>Start <i style="background:var(--green-600)"></i></span>
+      <span>Elapsed Time <i style="background:var(--purple-400)"></i></span>
+      ${cfg.chart==='line' ? '<span>Total Spending <i style="background:var(--gold-600)"></i></span>' : ''}
+    </div>`;
+  return `
+  <div class="site-card">
+    <div class="sc-head">
+      <div class="sc-name">Site Name</div>
+      <div class="sc-meta">
+        <span class="updated">${ICON.clock} Updated 1d ago</span>
+        <span class="status ${cfg.status==='Syncing'?'syncing':'auto'}">${cfg.status}</span>
+      </div>
+    </div>
+
+    <div class="metric">
+      <div class="metric-row">
+        <span class="metric-label ${cfg.dimStart?'dim':''}">${cfg.jp?'着手率':'Start Rate'}: <b>50%</b></span>
+      </div>
+      <div class="track"><div class="fill" style="width:50%"></div></div>
+    </div>
+    <div class="metric">
+      <div class="metric-row">
+        <span class="metric-label">${cfg.jp?'時間経過率':'Time Elapsed Rate'}: <b>60%</b></span>
+        <span class="metric-side">Construction Period: 2025/10/01-2026/0930</span>
+      </div>
+      <div class="track"><div class="fill" style="width:60%"></div></div>
+    </div>
+    <div class="metric">
+      <div class="metric-row">
+        <span class="metric-label">Total Expenditure Rate: <b>75%</b></span>
+        <span class="metric-side">Estimated Amount: $128,940&ensp;Expenditure Amount: $128,940</span>
+      </div>
+      <div class="track"><div class="fill grad" style="width:75%"></div></div>
+    </div>
+
+    <div class="sc-tabs">
+      <button class="tab ${cfg.chart==='line'?'active':''}" data-tab="line">Construction Progress</button>
+      <button class="tab ${cfg.chart==='bar'?'active':''}" data-tab="bar">Expenditure</button>
+      ${legendFull}
+    </div>
+
+    <div class="chart">${cfg.chart==='line' ? lineChart() : barChart()}</div>
+
+    <div class="sc-foot">
+      <button>${ICON.trend} Actuals (Overall)</button>
+      <button>${ICON.cal} Actuals (Daily)</button>
+      <button>${ICON.bars} Actuals (Summary)</button>
+    </div>
+  </div>`;
+}
+
+const CARDS = [
+  {status:'Syncing',        chart:'line', jp:false},
+  {status:'Auto Acquiring', chart:'bar',  jp:true},
+  {status:'Syncing',        chart:'line', jp:false, dimStart:true},
+  {status:'Auto Acquiring', chart:'line', jp:false}
+];
+
+const wrap = document.getElementById('cards');
+wrap.innerHTML = CARDS.map(siteCard).join('');
+
+// tab switching swaps the chart inside the same card
+wrap.addEventListener('click',e=>{
+  const tab = e.target.closest('.tab');
+  if(!tab) return;
+  const card = tab.closest('.site-card');
+  card.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===tab));
+  card.querySelector('.chart').innerHTML = tab.dataset.tab==='bar' ? barChart() : lineChart();
+});
 </script>
 </body>
 </html>
