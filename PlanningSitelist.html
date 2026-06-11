@@ -98,6 +98,18 @@
   }
   .tbl-row{padding:8px 12px;}
   .tbl-row:nth-child(even){background:var(--row-alt);}
+  /* newly registered site — highlighted until first opened */
+  .tbl-row.is-new{background:var(--indigo-50);}
+
+  /* status badges next to the site name */
+  .badge{
+    display:inline-flex;align-items:center;flex:0 0 auto;
+    font-size:10px;font-weight:700;letter-spacing:.3px;
+    border-radius:999px;padding:3px 9px;white-space:nowrap;
+  }
+  .badge-new{background:var(--white);color:var(--indigo-600);border:1px solid var(--indigo-200);}
+  .badge-progress{background:#FFF4DC;color:#8A6400;border:1px solid #F0DCA8;}
+  .badge-final{background:#EAFBEB;color:#167E1E;border:1px solid #BFEFC4;}
 
   .site-cell{display:flex;align-items:center;gap:14px;min-width:0;}
   .site-name{
@@ -233,11 +245,38 @@ const SVG = {
 /* Row variants matching the design:
    dates: 'filled' | 'filled-muted' | 'empty' | 'empty-muted'
    est:   'input-filled' | 'input-empty' */
-const ROWS = [
-  {name:'Tochigi Highway Road Work',            dates:'filled',       est:'input-empty'},
-  {name:'Shin-Tomei Expressway Embankment and Slope Stabilization Works Phase 2 (North Section)', dates:'filled', est:'input-filled'},
-  {name:'Kanto Region Dam Excavation',          dates:'empty',        est:'input-filled'}
+const SEED_SITES = [
+  {id:'site-1', name:'Tochigi Highway Road Work',            dates:'filled', est:'input-empty'},
+  {id:'site-2', name:'Shin-Tomei Expressway Embankment and Slope Stabilization Works Phase 2 (North Section)', dates:'filled', est:'input-filled'},
+  {id:'site-3', name:'Kanto Region Dam Excavation',          dates:'empty',  est:'input-filled'}
 ];
+
+/* ---- persisted site list (localStorage: abacus.sites) ---- */
+const SITES_KEY = 'abacus.sites';
+function loadSites(){
+  try{
+    const raw = localStorage.getItem(SITES_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(_e){ /* corrupted entry — reseed below */ }
+  localStorage.setItem(SITES_KEY, JSON.stringify(SEED_SITES));
+  return JSON.parse(JSON.stringify(SEED_SITES));
+}
+function saveSites(list){
+  try{ localStorage.setItem(SITES_KEY, JSON.stringify(list)); }catch(_e){}
+}
+let sites = loadSites();
+
+/* badge from planning persistence: NEW → In Progress → Finalized */
+function siteBadge(site){
+  if(site.status === 'new') return '<span class="badge badge-new">NEW</span>';
+  try{
+    const snap = JSON.parse(localStorage.getItem('abacus.planning.' + site.id) || 'null');
+    if(snap) return snap.acquired
+      ? '<span class="badge badge-final">Finalized</span>'
+      : '<span class="badge badge-progress">In Progress</span>';
+  }catch(_e){}
+  return '';
+}
 
 function dateInput(variant){
   const muted = variant.includes('muted') ? ' muted' : '';
@@ -259,41 +298,66 @@ function estCell(variant){
     </div>`;
 }
 
-document.getElementById('rows').innerHTML = ROWS.map(r=>`
-  <div class="tbl-row">
-    <div class="site-cell">
-      <span class="site-name">${r.name}</span>
-      <span class="last-edited">
-        <span class="le-label">${SVG.clock} Last Edited:</span>
-        <span class="le-time">00:00 mm/dd/yyyy</span>
-      </span>
-    </div>
-    <div class="date-group">
-      <span class="date-pair">
-        <span class="date-label">Announcement</span>
-        ${dateInput(r.dates)}
-      </span>
-      <span class="date-pair">
-        <span class="date-label">Bid Date</span>
-        ${dateInput(r.dates)}
-      </span>
-    </div>
-    ${estCell(r.est)}
-    <div class="exec-cell">$128,940</div>
-    <div class="actions-cell">
-      <button class="btn-planning">Planning</button>
-      <button class="btn-bidresult">Bid Result</button>
-    </div>
-  </div>`).join('');
+function renderRows(){
+  document.getElementById('rows').innerHTML = sites.map(r=>`
+    <div class="tbl-row ${r.status==='new' ? 'is-new' : ''}">
+      <div class="site-cell">
+        <span class="site-name">${r.name}</span>
+        ${siteBadge(r)}
+        <span class="last-edited">
+          <span class="le-label">${SVG.clock} Last Edited:</span>
+          <span class="le-time">00:00 mm/dd/yyyy</span>
+        </span>
+      </div>
+      <div class="date-group">
+        <span class="date-pair">
+          <span class="date-label">Announcement</span>
+          ${dateInput(r.dates)}
+        </span>
+        <span class="date-pair">
+          <span class="date-label">Bid Date</span>
+          ${dateInput(r.dates)}
+        </span>
+      </div>
+      ${estCell(r.est)}
+      <div class="exec-cell">$128,940</div>
+      <div class="actions-cell">
+        <button class="btn-planning" data-id="${r.id}">Planning</button>
+        <button class="btn-bidresult">Bid Result</button>
+      </div>
+    </div>`).join('');
 
-// clear button empties its sibling input
-document.querySelectorAll('.amount-clear').forEach(b=>{
-  b.addEventListener('click',()=>{ const i=b.parentElement.querySelector('input'); i.value=''; i.focus(); });
-});
+  // clear button empties its sibling input
+  document.querySelectorAll('.amount-clear').forEach(b=>{
+    b.addEventListener('click',()=>{ const i=b.parentElement.querySelector('input'); i.value=''; i.focus(); });
+  });
 
-// Planning button opens the execution planning page
-document.querySelectorAll('.btn-planning').forEach(b=>{
-  b.addEventListener('click',()=>{ location.href='planning.html'; });
+  // [Planning] → open the editor for THIS site; first open clears the NEW flag
+  document.querySelectorAll('.btn-planning').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const id = b.dataset.id;
+      localStorage.setItem('abacus.currentSiteId', id); // fallback for pages without the URL param
+      sites = sites.map(s => s.id === id ? { ...s, status: undefined } : s); // drop 'new' after first open
+      saveSites(sites);
+      location.href = 'planning.html?siteId=' + encodeURIComponent(id);
+    });
+  });
+
+  bindNameTooltips();
+}
+
+// [Register Site for Quotation] → append a highlighted NEW site
+document.querySelector('.btn-register').addEventListener('click',()=>{
+  sites = [...sites, {
+    id: 'site-' + Date.now(),
+    name: 'Site Name',
+    dates: 'filled-muted',
+    est: 'input-filled',
+    status: 'new',
+    createdAt: Date.now()
+  }];
+  saveSites(sites);
+  renderRows();
 });
 
 // tooltip: show full site name on hover, only when the text is truncated
@@ -301,18 +365,22 @@ const tip = document.createElement('div');
 tip.className = 'tooltip';
 document.body.appendChild(tip);
 
-document.querySelectorAll('.site-name').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{
-    if(el.scrollHeight <= el.clientHeight + 1) return; // fully visible — no tooltip
-    tip.textContent = el.textContent.trim();
-    tip.classList.add('show');
-    const r = el.getBoundingClientRect();
-    tip.style.left = r.left + 'px';
-    tip.style.top = '0px'; // place first so height is measurable
-    tip.style.top = (r.top - tip.offsetHeight - 10) + 'px';
+function bindNameTooltips(){
+  document.querySelectorAll('.site-name').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{
+      if(el.scrollHeight <= el.clientHeight + 1) return; // fully visible — no tooltip
+      tip.textContent = el.textContent.trim();
+      tip.classList.add('show');
+      const r = el.getBoundingClientRect();
+      tip.style.left = r.left + 'px';
+      tip.style.top = '0px'; // place first so height is measurable
+      tip.style.top = (r.top - tip.offsetHeight - 10) + 'px';
+    });
+    el.addEventListener('mouseleave',()=>tip.classList.remove('show'));
   });
-  el.addEventListener('mouseleave',()=>tip.classList.remove('show'));
-});
+}
+
+renderRows();
 </script>
 </body>
 </html>
