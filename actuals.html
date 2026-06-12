@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1440, initial-scale=1" />
+<title>Abacus — Actuals (Prototype)</title>
+<style>
+  /* ---------- Color tokens (same as planning.html) ---------- */
+  :root {
+    --indigo-50:#E5E4FB; --indigo-100:#C3C0F6; --indigo-200:#9791F1;
+    --indigo-300:#736CED; --indigo-400:#5148EA; --indigo-500:#2F24E6;
+    --indigo-600:#1D14C8; --indigo-700:#140A94; --indigo-800:#0D0765;
+    --indigo-900:#07043C;
+    --white:#FFFFFF; --black:#000000;
+    --neutral-50:#F4F5F5; --neutral-100:#ECEDEE; --neutral-200:#D6D7DB;
+    --neutral-300:#B5B8BF; --neutral-400:#A0A3AC; --neutral-500:#8C909B;
+    --neutral-600:#6B6F7B; --neutral-700:#51545D; --neutral-800:#2F3137;
+    --neutral-900:#131416;
+    --red-50:#FCEDED; --red-100:#F7CCCC; --red-300:#F18A8F; --red-500:#D50000; --red-600:#AA0000;
+    --green-50:#EAFBEB; --green-100:#D0F6D3; --green-500:#28D435; --green-700:#167E1E;
+  }
+  * { box-sizing:border-box; }
+  html, body {
+    margin:0; padding:0; height:100%;
+    background:var(--neutral-50); color:var(--neutral-900);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size:13px; line-height:1.4;
+  }
+
+  /* ---------- Top header ---------- */
+  .topbar {
+    height:44px; background:var(--white); color:var(--indigo-500); border-bottom:1px solid var(--neutral-200);
+    display:flex; align-items:center; padding:12px;
+  }
+  .topbar a { text-decoration:none; color:var(--indigo-500); }
+  .topbar .brand { font-weight:700; letter-spacing:.3px; font-size:24px; }
+  .topbar .right { margin-left:auto; display:flex; gap:12px; align-items:center; color:var(--neutral-700); }
+
+  /* ---------- Page header ---------- */
+  .page-header { background:var(--white); border-bottom:1px solid var(--neutral-200); padding:12px; }
+  .breadcrumb { font-size:12px; color:var(--neutral-600); display:flex; align-items:center; gap:6px; }
+  .breadcrumb a { color:var(--neutral-600); text-decoration:none; cursor:pointer; }
+  .breadcrumb a:hover { color:var(--indigo-500); }
+  .breadcrumb .sep { color:var(--neutral-400); }
+  .breadcrumb .plan-pill {
+    margin-left:8px; padding:8px; border:1px solid var(--indigo-500);
+    color:var(--indigo-500); border-radius:8px; font-weight:600;
+  }
+
+  /* tabs */
+  .tabs-row { display:flex; align-items:center; justify-content:space-between; margin-top:12px; }
+  .tabs { display:flex; gap:0; }
+  .tab {
+    padding:10px 16px; font-size:13px; color:var(--neutral-600);
+    cursor:pointer; border-bottom:2px solid transparent; font-weight:500;
+  }
+  .tab:hover { color:var(--neutral-900); }
+  .tab.active { color:var(--indigo-600); border-bottom-color:var(--indigo-500); font-weight:600; }
+
+  /* ---------- Actuals shared header ---------- */
+  .actuals-meta .chips { display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .actuals-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--indigo-50); border-radius:6px; padding:5px 10px;
+    font-size:12px; color:var(--neutral-700);
+  }
+  .actuals-chip strong { color:var(--neutral-900); }
+  .actuals-chip .ic { width:13px; height:13px; }
+  .kpi-bar { display:flex; gap:28px; margin-top:10px; flex-wrap:wrap; }
+  .kpi { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--neutral-700); }
+  .kpi b { color:var(--neutral-900); font-size:13px; }
+  .kpi .track { width:110px; height:8px; border-radius:999px; background:var(--neutral-200); overflow:hidden; }
+  .kpi .fill, .actuals-cellbar .fill {
+    height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--green-500), #19B5A6 60%, var(--indigo-300));
+  }
+
+  /* ---------- Panels / cards / tables (same look as planning's actuals) ---------- */
+  .actuals-panel { display:none; }
+  .actuals-panel.show { display:block; }
+  .actuals-card {
+    background:var(--white); border:1px solid var(--neutral-200); border-radius:10px;
+    margin:14px 16px; overflow:hidden;
+  }
+  .actuals-subhead {
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:12px 16px; border-bottom:1px solid var(--neutral-200); font-size:13px;
+  }
+  .actuals-subhead .spacer { flex:1; }
+  .actuals-date { color:var(--indigo-500); font-weight:700; cursor:pointer; }
+  .actuals-date:hover { text-decoration:underline; }
+  .actuals-scroll { overflow-x:auto; }
+  table.actuals-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.actuals-table th {
+    background:var(--neutral-100); color:var(--neutral-900); font-weight:700; text-align:left;
+    padding:9px 12px; border-bottom:1px solid var(--neutral-200); white-space:nowrap;
+  }
+  table.actuals-table td {
+    padding:10px 12px; border-bottom:1px solid var(--neutral-100);
+    color:var(--neutral-900); white-space:nowrap; vertical-align:middle;
+  }
+  table.actuals-table tbody tr:nth-child(even) td { background:var(--neutral-50); }
+  .th-sort { display:inline-flex; vertical-align:-2px; margin-left:6px; color:var(--neutral-500); cursor:pointer; }
+  .th-sort svg { width:12px; height:12px; }
+  .diff-neg { color:var(--red-600); }
+  .diff-pos { color:var(--green-700); }
+  .muted-na { color:var(--neutral-500); }
+  .actuals-cellbar { display:inline-flex; align-items:center; gap:8px; }
+  .actuals-cellbar .track { width:80px; height:8px; border-radius:999px; background:var(--neutral-200); overflow:hidden; flex:0 0 auto; }
+  .actuals-cellbar b { min-width:38px; font-weight:600; }
+
+  .chip-toggle {
+    background:var(--white); border:1px solid var(--neutral-300); border-radius:6px;
+    padding:4px 10px; font-size:11.5px; color:var(--neutral-700); cursor:pointer;
+  }
+  .chip-toggle:hover { border-color:var(--indigo-300); }
+  .chip-toggle.selected { border:1.5px solid var(--indigo-500); color:var(--indigo-600); font-weight:600; }
+  .chip-toggle.selected-solid { background:var(--indigo-500); border-color:var(--indigo-500); color:var(--white); font-weight:600; }
+  .chips-inline { display:inline-flex; align-items:center; gap:6px; }
+
+  .day-nav { display:inline-flex; align-items:center; gap:8px; }
+  .day-nav button {
+    width:26px; height:26px; border:1px solid var(--neutral-300); border-radius:6px;
+    background:var(--white); color:var(--neutral-700); display:inline-flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:0;
+  }
+  .day-nav button:hover { border-color:var(--indigo-400); color:var(--indigo-600); }
+  .day-nav svg { width:12px; height:12px; }
+
+  /* ---------- Summary table ---------- */
+  .as-controls { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:12px 16px; border-bottom:1px solid var(--neutral-200); font-size:12.5px; }
+  .as-controls label.radio { display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:var(--neutral-800); }
+  .as-controls input[type=radio] { accent-color:var(--indigo-500); }
+  .as-controls .date-range { display:inline-flex; align-items:center; gap:6px; }
+  .as-controls .date-range input {
+    width:110px; border:1px solid var(--neutral-300); border-radius:6px; padding:5px 8px;
+    font-size:12px; font-family:inherit; color:var(--neutral-900);
+  }
+  .as-controls .src-label { color:var(--neutral-600); }
+  .as-controls .synced-note { font-size:11px; color:var(--neutral-500); }
+  table.as-table { border-collapse:collapse; font-size:12px; min-width:100%; }
+  table.as-table th, table.as-table td {
+    border-bottom:1px solid var(--neutral-100); padding:8px 10px; white-space:nowrap;
+    background:var(--white); color:var(--neutral-900); text-align:left;
+  }
+  table.as-table thead th { background:var(--neutral-100); font-weight:700; border-bottom:1px solid var(--neutral-200); }
+  table.as-table .day-col { text-align:center; min-width:44px; }
+  table.as-table .offday { background:var(--red-50) !important; }
+  table.as-table .na { color:var(--red-300); font-style:italic; text-align:center; }
+  table.as-table .as-c1, table.as-table .as-c2, table.as-table .as-c3,
+  table.as-table .as-c4, table.as-table .as-c5 { position:sticky; z-index:2; }
+  table.as-table thead .as-c1, table.as-table thead .as-c2, table.as-table thead .as-c3,
+  table.as-table thead .as-c4, table.as-table thead .as-c5 { z-index:3; }
+  table.as-table .as-c1 { left:0;     min-width:130px; max-width:130px; }
+  table.as-table .as-c2 { left:130px; min-width:86px;  max-width:86px; }
+  table.as-table .as-c3 { left:216px; min-width:86px;  max-width:86px; }
+  table.as-table .as-c4 { left:302px; min-width:104px; max-width:104px; }
+  table.as-table .as-c5 { left:406px; min-width:104px; max-width:104px; border-right:1px solid var(--neutral-300); }
+  table.as-table tr.as-group td {
+    background:var(--indigo-700) !important; color:var(--white); font-weight:700; border-bottom:none;
+  }
+  table.as-table tr.as-group td.na, table.as-table tr.as-group td.offday { background:var(--indigo-700) !important; color:var(--white); }
+
+  /* ---------- Drawer (Actuals by Resource) ---------- */
+  .drawer-scrim {
+    position:fixed; inset:0; background:rgba(19,20,22,.35); z-index:94;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .drawer-scrim.show { opacity:1; pointer-events:auto; }
+  .drawer {
+    position:fixed; top:0; right:0; bottom:0; width:min(900px, 80vw); max-width:96vw;
+    background:var(--white); border-left:1px solid var(--neutral-200);
+    box-shadow:-12px 0 32px rgba(0,0,0,.12); transform:translateX(100%);
+    transition:transform .22s ease; z-index:95; display:flex; flex-direction:column;
+  }
+  .drawer.show { transform:translateX(0); }
+  .drawer-header {
+    padding:14px 20px; border-bottom:1px solid var(--neutral-200);
+    display:flex; align-items:flex-start; justify-content:space-between;
+  }
+  .drawer-body { padding:18px 20px; overflow-y:auto; flex:1; font-size:13px; color:var(--neutral-800); }
+  .rd-crumb { font-size:13px; display:flex; align-items:center; gap:8px; }
+  .rd-crumb a { color:var(--indigo-500); text-decoration:none; cursor:pointer; }
+  .rd-meta { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+  .rd-meta .date { color:var(--indigo-500); font-weight:700; }
+  .rd-section { border-top:1px solid var(--neutral-200); margin-top:20px; padding-top:14px; }
+  .rd-section-head { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .rd-section-head h4 { margin:0; font-size:14.5px; font-weight:700; color:var(--neutral-900); }
+  .rd-section-head .meta { margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--neutral-600); }
+  .rd-edit {
+    background:none; color:var(--indigo-400); cursor:pointer; padding:2px;
+    display:inline-flex; border:1px solid var(--indigo-200); border-radius:5px;
+  }
+  .rd-edit svg { width:13px; height:13px; }
+  .rd-details-btn { margin-top:10px; }
+  .icon-x { background:none; border:none; cursor:pointer; color:var(--neutral-600); padding:4px; }
+  .icon-x:hover { color:var(--neutral-900); }
+  .icon-x svg { width:16px; height:16px; }
+
+  /* ---------- Toast (same as planning.html) ---------- */
+  .toast {
+    position:fixed; bottom:32px; right:24px; left:auto;
+    background:var(--white); border:1.5px solid var(--neutral-300);
+    border-radius:8px; padding:12px 14px 12px 12px;
+    display:none; align-items:flex-start; gap:10px;
+    min-width:280px; max-width:420px; z-index:200;
+    box-shadow:0 8px 24px rgba(0,0,0,.12);
+    color:var(--neutral-900); font-size:13px;
+    transform:translateY(8px); opacity:0;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .toast.show { display:flex; opacity:1; transform:translateY(0); }
+  .toast .t-icon { flex-shrink:0; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; }
+  .toast .t-icon svg { width:22px; height:22px; }
+  .toast .t-title { font-size:14px; font-weight:700; line-height:1.35; }
+  .toast .t-close {
+    background:transparent; border:none; cursor:pointer; color:var(--neutral-600);
+    width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+    padding:0; font-size:18px; line-height:1; flex-shrink:0;
+  }
+  .toast.success { border-color:var(--green-500); }
+  .toast.success .t-icon { color:var(--green-500); }
+</style>
+<link rel="stylesheet" href="buttons.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand"><a href="index.html">abacus</a></span>
+  <div class="right">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#51545D" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#51545D" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+  </div>
+</div>
+
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="index.html">Ongoing Sites</a>
+    <span class="sep">›</span>
+    <p id="crumbSiteName" style="margin:0;">Site Name</p>
+    <span id="planPill" class="plan-pill">PlanName V1</span>
+  </div>
+
+  <!-- shared Actuals header -->
+  <div class="actuals-meta">
+    <div class="chips">
+      <span class="actuals-chip">
+        <svg class="ic" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Last Synced: <strong id="actSyncedAt">00:00 mm/dd/yyyy</strong>
+      </span>
+      <span class="actuals-chip">Construction Period <strong>mm/dd/yyyy - mm/dd/yyyy</strong></span>
+    </div>
+    <div class="kpi-bar">
+      <span class="kpi">Total Start Rate: <b>50%</b><span class="track"><span class="fill" style="display:block;width:50%"></span></span></span>
+      <span class="kpi">Total Elapsed Time Rate <b>60%</b><span class="track"><span class="fill" style="display:block;width:60%"></span></span></span>
+      <span class="kpi">Total Progress Rate <b>80%</b><span class="track"><span class="fill" style="display:block;width:80%"></span></span></span>
+      <span class="kpi">Total Cost Rate <b>40%</b><span class="track"><span class="fill" style="display:block;width:40%"></span></span></span>
+      <span class="kpi">Total Expenditure Rate <b>80%</b><span class="track"><span class="fill" style="display:block;width:80%"></span></span></span>
+    </div>
+  </div>
+
+  <div class="tabs-row">
+    <div class="tabs" id="mainTabs">
+      <div class="tab" data-tab="planning">Execution Planning</div>
+      <div class="tab" data-tab="cumulative">Actuals (Cumulative)</div>
+      <div class="tab active" data-tab="daily">Actuals (Daily)</div>
+      <div class="tab" data-tab="summary">Actuals (Summary)</div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div id="panelCumulative" class="actuals-panel"></div>
+  <div id="panelDaily" class="actuals-panel"></div>
+  <div id="panelSummary" class="actuals-panel"></div>
+</main>
+
+<!-- Actuals by Resource drawer -->
+<div id="actResDrawerScrim" class="drawer-scrim" onclick="closeActResDrawer()"></div>
+<aside id="actResDrawer" class="drawer">
+  <div class="drawer-header">
+    <div class="rd-crumb">
+      <a onclick="closeActResDrawer()">Daily Actuals</a>
+      <span class="sep">›</span>
+      <span>Actuals by Resource</span>
+    </div>
+    <button class="icon-x" onclick="closeActResDrawer()" title="Close">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="actResBody"></div>
+</aside>
+
+<!-- Toast -->
+<div id="toast" class="toast" role="status" aria-live="polite">
+  <span class="t-icon" id="tIcon"></span>
+  <div class="t-body"><div class="t-title" id="tTitle"></div></div>
+  <button class="t-close" id="tClose" type="button" aria-label="Close">×</button>
+</div>
+
+<script>
+/* ============================================================
+   Actuals — the post-finalization workspace for one site.
+   Reads/writes the same per-site snapshot: abacus.planning.<siteId>
+============================================================ */
+const $ = id => document.getElementById(id);
+
+function ts(){
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return `${p(d.getMonth()+1)}/${p(d.getDate())}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/* ---- toast (planning.html behavior) ---- */
+const TOAST_ICONS = {
+  success:'<svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9.25" stroke="currentColor" stroke-width="1.5"/><path d="m6.5 11.5 3 3 6-6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+let _toastTimer;
+function toast(msg, kind){
+  kind = kind || 'success';
+  $('tIcon').innerHTML = TOAST_ICONS.success;
+  $('tTitle').textContent = msg || '';
+  $('toast').className = 'toast show ' + kind;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { $('toast').className = 'toast'; }, 5000);
+}
+$('tClose').addEventListener('click', () => { $('toast').className = 'toast'; });
+
+/* ---- per-site state ---- */
+const SITE_ID = new URLSearchParams(location.search).get('siteId')
+  || localStorage.getItem('abacus.currentSiteId') || 'demo';
+const STORE_KEY = 'abacus.planning.' + SITE_ID;
+
+let snap = null;
+try { snap = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch(_e) { snap = null; }
+if (!snap) snap = {};                       // demo fallback — render with sample data, no persist for unknown sites
+const PERSIST = SITE_ID !== 'demo';
+
+let _saveTimer;
+function persist(){
+  if (!PERSIST) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(snap)); } catch(_e) {}
+  }, 300);
+}
+
+/* ---- sample data (seeded once into the snapshot) ---- */
+const ACT_CUM_ROWS = [
+  {lv1:'Clearing', lv2:'Tree Bush Cl…', lv3:'Section A', lv4:'--', eq:'10EA', eur:'$1,200', ea:'$12,000', aq:'6EA', aur:'$548', aa:'$3,288', diff:'−$8,712', prog:60, cost:27, exp:27},
+  {lv1:'Clearing', lv2:'Tree Bush Cl…', lv3:'Section B', lv4:'--', eq:'10EA', eur:'$1,200', ea:'$12,000', aq:'6EA', aur:'$548', aa:'$3,288', diff:'−$8,712', prog:60, cost:27, exp:27},
+  {lv1:'Erosion Control', lv2:'Silt Fence', lv3:'--', lv4:'--', eq:'1,523LF', eur:'$9.85', ea:'$15,000', aq:'525LF', aur:'$18', aa:'$9,450', diff:'-$5,550', prog:34, cost:63, exp:63},
+  {lv1:'Erosion Control', lv2:'Temp Constr…', lv3:'--', lv4:'--', eq:'226.25ton', eur:'$69.47', ea:'$15,717', aq:'113ton', aur:'$78', aa:'$8,814', diff:'-$6,903', prog:49, cost:56, exp:56},
+  {lv1:'Stripping', lv2:'Top Soil', lv3:'Section A', lv4:'--', eq:'1,000CYD', eur:'$3.48', ea:'$3,476', aq:'392CYD', aur:'$25', aa:'$9,800', diff:'-$22', prog:39, cost:282, exp:281},
+  {lv1:'Stripping', lv2:'Top Soil', lv3:'Section B', lv4:'--', eq:'600CYD', eur:'$3.48', ea:'$2,085', aq:'0CYD', aur:null, aa:'$0', diff:null, prog:0, cost:0, exp:0},
+  {lv1:'Storm Sewer', lv2:'15&quot; RCP', lv3:'STR10–SR13', lv4:'--', eq:'152ft', eur:'$111.18', ea:'$16,900', aq:'26ft', aur:'$849', aa:'$22,074', diff:'+$738', prog:17, cost:130, exp:130},
+  {lv1:'Storm Sewer', lv2:'12&quot; RCP', lv3:'STR7–STR11', lv4:'--', eq:'72ft', eur:'$133.07', ea:'$9,581', aq:'0ft', aur:null, aa:'$0', diff:null, prog:0, cost:0, exp:0}
+];
+const ACT_DAILY_ROWS = [
+  {lv1:'Clearing', lv2:'Tree Bush Cl…', lv3:'Section A', lv4:'--', pq:'2EA', aq:'2EA', qv:'0%', pur:'$1,200', aur:'$548', urd:'-$652'},
+  {lv1:'Clearing', lv2:'Tree Bush Cl…', lv3:'Section B', lv4:'--', pq:'2EA', aq:'1EA', qv:'-50%', pur:'$1,200', aur:'$548', urd:'-$652'},
+  {lv1:'Erosion Control', lv2:'Silt Fence', lv3:'--', lv4:'--', pq:'150LF', aq:'120LF', qv:'-20%', pur:'$9.85', aur:'$18', urd:'+$8.15'},
+  {lv1:'Erosion Control', lv2:'Temp Constr…', lv3:'--', lv4:'--', pq:'25ton', aq:'18ton', qv:'-28%', pur:'$69.47', aur:'$78', urd:'+$8.53'},
+  {lv1:'Stripping', lv2:'Top Soil', lv3:'Section A', lv4:'--', pq:'100CYD', aq:'92CYD', qv:'-8%', pur:'$3.48', aur:'$25', urd:'+$21.52'},
+  {lv1:'Stripping', lv2:'Top Soil', lv3:'Section B', lv4:'--', pq:'80CYD', aq:'0CYD', qv:null, pur:'$3.48', aur:null, urd:null},
+  {lv1:'Storm Sewer', lv2:'15&quot; RCP', lv3:'STR10–SR13', lv4:'--', pq:'20ft', aq:'26ft', qv:'+30%', pur:'$111.18', aur:'$849', urd:'+$737.82'},
+  {lv1:'Storm Sewer', lv2:'12&quot; RCP', lv3:'STR7–STR11', lv4:'--', pq:'15ft', aq:'0ft', qv:null, pur:'$133.07', aur:null, urd:null}
+];
+
+/* seed once: actuals data attaches to the site snapshot */
+if (!snap.actuals) snap.actuals = { finalized:true };
+if (!snap.actuals.cumulative){
+  Object.assign(snap.actuals, {
+    cumulative: ACT_CUM_ROWS,
+    daily: { 'mm/dd/yyyy': ACT_DAILY_ROWS },
+    dataSource: 'Dashboard',
+    summarySource: 'Simulation',
+    summaryCategory: 'Transport Vehicle',
+    lastSyncedAt: snap.actuals.lastSyncedAt || ts()
+  });
+  persist();
+}
+const A = snap.actuals;
+
+/* ---- header ---- */
+(function initHeader(){
+  try {
+    const sites = JSON.parse(localStorage.getItem('abacus.sites') || '[]');
+    const s = sites.find(x => x.id === SITE_ID);
+    if (s && s.name) $('crumbSiteName').textContent = s.name;
+  } catch(_e) {}
+  $('planPill').textContent = A.planName || 'PlanName V1';
+  $('actSyncedAt').textContent = A.lastSyncedAt || '00:00 mm/dd/yyyy';
+})();
+
+/* ---- shared bits ---- */
+const SORT_ICON = '<span class="th-sort" title="Sort (prototype)"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4v14M6 18l-3-3M6 18l3-3M18 20V6M18 6l-3 3M18 6l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+const REFRESH_ICON = '<svg viewBox="0 0 20 20" fill="none" style="width:14px;height:14px;"><path d="M16 10a6 6 0 1 1-1.76-4.24M16 2v4h-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const EXPORT_ICON = '<svg viewBox="0 0 20 20" fill="none" style="width:14px;height:14px;"><path d="M10 13V3M10 3 6 7M10 3l4 4M4 14v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const PENCIL_ICON = '<svg viewBox="0 0 20 20" fill="none"><path d="M12.8 3.7a1.8 1.8 0 0 1 2.5 2.5L7 14.5l-3.4.9.9-3.4 8.3-8.3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+
+function actCellBar(p){
+  return `<span class="actuals-cellbar"><b>${p}%</b><span class="track"><span class="fill" style="display:block;width:${Math.min(p,100)}%"></span></span></span>`;
+}
+function actDiff(v){
+  if (v == null) return '<span class="muted-na">--</span>';
+  return `<span class="${v.startsWith('+') ? 'diff-pos' : 'diff-neg'}">${v}</span>`;
+}
+
+/* ---- tabs ---- */
+const PANEL_IDS = { cumulative:'panelCumulative', daily:'panelDaily', summary:'panelSummary' };
+function switchTab(name){
+  if (name === 'planning'){
+    // back to a FRESH Execution Planning page — the submitted plan was archived here
+    location.href = 'planning.html?siteId=' + encodeURIComponent(SITE_ID);
+    return;
+  }
+  document.querySelectorAll('#mainTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  Object.entries(PANEL_IDS).forEach(([n, id]) => $(id).classList.toggle('show', n === name));
+  const panel = $(PANEL_IDS[name]);
+  if (panel.dataset.rendered !== '1'){
+    panel.dataset.rendered = '1';
+    if (name === 'cumulative') renderCumulative(panel);
+    if (name === 'daily')      renderDaily(panel);
+    if (name === 'summary')    renderSummary(panel);
+  }
+}
+$('mainTabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if (t) switchTab(t.dataset.tab);
+});
+
+/* ---- Tab: Cumulative ---- */
+function renderCumulative(panel){
+  const HEAD = ['Task (Lv1)','Task (Lv2)','Task (Lv3)','Task (Lv4)','Estimated Quantity','Estimated Unit Rate','Estimated Amount','Actual Quantity','Actual Unit Rate','Actual Amount','Amount Difference','Progress Rate','Cost Rate','Expenditure Rate'];
+  panel.innerHTML = `
+  <div class="actuals-card">
+    <div class="actuals-subhead">
+      <span>Cumulative data as of: <span class="actuals-date" id="cumAsOf">mm/dd/yyyy</span></span>
+      <span class="spacer"></span>
+      <button class="btn btn-link" id="cumUpdate">${REFRESH_ICON} Update</button>
+    </div>
+    <div class="actuals-scroll">
+      <table class="actuals-table">
+        <thead><tr>${HEAD.map(h => `<th>${h}${SORT_ICON}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${A.cumulative.map(r => `
+          <tr>
+            <td>${r.lv1}</td><td>${r.lv2}</td><td>${r.lv3}</td><td>${r.lv4}</td>
+            <td>${r.eq}</td><td>${r.eur}</td><td>${r.ea}</td>
+            <td>${r.aq}</td><td>${r.aur ?? '<span class="muted-na">--</span>'}</td><td>${r.aa}</td>
+            <td>${actDiff(r.diff)}</td>
+            <td>${actCellBar(r.prog)}</td><td>${actCellBar(r.cost)}</td><td>${actCellBar(r.exp)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+  $('cumUpdate').addEventListener('click', () => {
+    A.lastSyncedAt = ts();
+    $('actSyncedAt').textContent = A.lastSyncedAt;
+    persist();
+    toast('Cumulative data updated.');
+  });
+  $('cumAsOf').addEventListener('click', () => toast('Date picker (prototype)'));
+}
+
+/* ---- Tab: Daily ---- */
+function renderDaily(panel){
+  const HEAD = ['Task (Lv1)','Task (Lv2)','Task (Lv3)','Task (Lv4)','Planned Quantity','Actual Quantity','Quantity Variance','Planned Unit Rate','Actual Unit Rate','Unit Rate Difference'];
+  const rows = A.daily['mm/dd/yyyy'] || ACT_DAILY_ROWS;
+  const srcChips = ['Dashboard','Fleet Data','Manual'].map(s =>
+    `<button class="chip-toggle ${A.dataSource === s ? 'selected' : ''}" data-src="${s}">${s}</button>`).join('');
+  panel.innerHTML = `
+  <div class="actuals-card">
+    <div class="actuals-subhead">
+      <span class="day-nav">
+        <button id="dayPrev" title="Previous day"><svg viewBox="0 0 12 12" fill="none"><path d="M8 2 4 6l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="dayNext" title="Next day"><svg viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </span>
+      <span>Yesterday [<span class="actuals-date" id="dailyDateLbl">mm/dd/yyyy (Wed)</span>]</span>
+      <span class="spacer"></span>
+      <span class="chips-inline">Data synced from: <span id="dailySrcChips" class="chips-inline">${srcChips}</span></span>
+    </div>
+    <div class="actuals-scroll">
+      <table class="actuals-table">
+        <thead><tr>${HEAD.map(h => `<th>${h}${SORT_ICON}</th>`).join('')}<th>Actions</th></tr></thead>
+        <tbody>
+          ${rows.map((r,i) => `
+          <tr>
+            <td>${r.lv1}</td><td>${r.lv2}</td><td>${r.lv3}</td><td>${r.lv4}</td>
+            <td>${r.pq}</td><td>${r.aq}</td>
+            <td>${r.qv == null ? '<span class="muted-na">not started</span>' : r.qv}</td>
+            <td>${r.pur}</td>
+            <td>${r.aur ?? '<span class="muted-na">--</span>'}</td>
+            <td>${actDiff(r.urd)}</td>
+            <td><button class="btn btn-sm" data-details="${i}">details</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+  $('dayPrev').addEventListener('click', () => toast('Previous day (prototype)'));
+  $('dayNext').addEventListener('click', () => toast('Next day (prototype)'));
+  $('dailyDateLbl').addEventListener('click', () => toast('Date picker (prototype)'));
+  $('dailySrcChips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip-toggle');
+    if (!chip) return;
+    A.dataSource = chip.dataset.src;
+    document.querySelectorAll('#dailySrcChips .chip-toggle').forEach(c => c.classList.toggle('selected', c === chip));
+    persist();
+    toast('Data source: ' + chip.dataset.src);
+  });
+  panel.querySelectorAll('[data-details]').forEach(b =>
+    b.addEventListener('click', () => openActResDrawer(Number(b.dataset.details))));
+}
+
+/* ---- Tab: Summary ---- */
+const AS_DAYS = Array.from({length:15}, (_,i) => 14 + i);
+const AS_OFFDAYS = new Set([14, 20, 21, 27, 28]);
+const AS_EXCAVATION_ROWS = [
+  ['Dump','--','$128.83','128h','$128.83'],
+  ['Dump','--','$128.83','128h','$128.83'],
+  ['ADT','--','$128.83','4trips','$128.83'],
+  ['Operator','Skilled','$42.00','80h','$3,360.00'],
+  ['General Worker','Standard','$28.00','120h','$3,360.00'],
+  ['Bulldozer','D61','$128.83','64h','$8,192.00'],
+  ['Breaker','Hydraulic','$128.83','32h','$3,520.00'],
+  ['Survey Staff','Assistant','$35.00','24h','$840.00'],
+  ['Excavator','0.7m³','$128.83','96h','$13,920.00']
+];
+function asDayCells(kind){
+  return AS_DAYS.map(d => {
+    const off = AS_OFFDAYS.has(d);
+    if (kind === 'empty') return `<td class="day-col${off ? ' offday' : ''}"></td>`;
+    if (kind === 'na-all') return `<td class="day-col na">NA</td>`;
+    return off ? '<td class="day-col offday na">NA</td>' : '<td class="day-col">8</td>';
+  }).join('');
+}
+function asStickyCells(vals){
+  return vals.map((v,i) => `<td class="as-c${i+1}">${v}</td>`).join('');
+}
+function renderSummary(panel){
+  const cat = A.summaryCategory || 'Transport Vehicle';
+  const src = A.summarySource || 'Simulation';
+  panel.innerHTML = `
+  <div class="actuals-card">
+    <div class="as-controls">
+      <button class="btn ghost-icon" id="asFilter" title="Filter" style="padding:4px 8px;">
+        <svg viewBox="0 0 20 20" fill="none" style="width:14px;height:14px;"><path d="M3 4h14l-5.5 6.5V16l-3-1.5v-4L3 4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </button>
+      ${['Transport Vehicle','Machinery','Labor'].map(c => `
+        <label class="radio"><input type="radio" name="asCat" value="${c}" ${c === cat ? 'checked' : ''}/> ${c}</label>`).join('')}
+      <span class="date-range">
+        <input placeholder="00/00/0000" /> <span>~</span> <input placeholder="00/00/0000" />
+      </span>
+      <span style="flex:1"></span>
+      <span class="src-label">Data Source:</span>
+      <span id="asSrcChips" class="chips-inline">
+        <button class="chip-toggle ${src === 'Simulation' ? 'selected-solid' : ''}" data-src="Simulation">Simulation</button>
+        <button class="chip-toggle ${src === 'Dashboard' ? 'selected-solid' : ''}" data-src="Dashboard">Dashboard</button>
+      </span>
+      <span class="synced-note">last synced: 2026.08.26 00:00</span>
+      <button class="btn export-btn" id="asExport">${EXPORT_ICON} Export</button>
+    </div>
+    <div class="actuals-scroll">
+      <table class="as-table">
+        <thead><tr>
+          ${['Name','Standard','Unit Rate','Total Quantity','Total Amount'].map((h,i) => `<th class="as-c${i+1}">${h}${SORT_ICON}</th>`).join('')}
+          ${AS_DAYS.map(d => `<th class="day-col${AS_OFFDAYS.has(d) ? ' offday' : ''}">${d}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          <tr class="as-group">${asStickyCells(['Excavation','--','--','--','$1,288.31'])}${asDayCells('empty')}</tr>
+          ${AS_EXCAVATION_ROWS.map(r => `<tr>${asStickyCells(r)}${asDayCells('value')}</tr>`).join('')}
+          <tr class="as-group">${asStickyCells(['Embankment','--','--','--','--'])}${asDayCells('empty')}</tr>
+          ${Array.from({length:7}, () => `<tr>${asStickyCells(['--','--','--','--','--'])}${asDayCells('empty')}</tr>`).join('')}
+          <tr class="as-group">${asStickyCells(['Period Total Amount','--','--','--','$644.12'])}${asDayCells('na-all')}</tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+  $('asFilter').addEventListener('click', () => toast('Filter (prototype)'));
+  $('asExport').addEventListener('click', () => toast('Export started (prototype)'));
+  panel.querySelectorAll('input[name=asCat]').forEach(r => r.addEventListener('change', () => {
+    A.summaryCategory = r.value;
+    persist();
+    toast('Filter: ' + r.value);
+  }));
+  $('asSrcChips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip-toggle');
+    if (!chip) return;
+    A.summarySource = chip.dataset.src;
+    document.querySelectorAll('#asSrcChips .chip-toggle').forEach(c => c.classList.toggle('selected-solid', c === chip));
+    persist();
+    toast('Data source: ' + chip.dataset.src);
+  });
+}
+
+/* ---- Actuals by Resource drawer ---- */
+function rdSyncChips(){
+  return `<span class="chips-inline">synced from:
+    <button class="chip-toggle selected">Dashboard</button>
+    <button class="chip-toggle">Fleet Data</button>
+    <button class="chip-toggle">Simulation</button>
+  </span> <span>last updated: 00/00 00:00</span>`;
+}
+function rdBar(p){
+  return `<span class="actuals-cellbar"><b>${p}%</b><span class="track"><span class="fill" style="display:block;width:${p}%"></span></span></span>`;
+}
+function rdMemo(text){
+  return `<td>${text} <button class="rd-edit" title="Edit memo">${PENCIL_ICON}</button></td>`;
+}
+function openActResDrawer(rowIdx){
+  const row = (A.daily['mm/dd/yyyy'] || ACT_DAILY_ROWS)[rowIdx] || {};
+  $('actResBody').innerHTML = `
+    <div class="rd-meta">
+      <span class="date">mm/dd/yyyy (Wed)</span>
+      <span>${row.lv1 || 'Excavation'}</span>
+      <span style="margin-left:auto;display:inline-flex;gap:8px;">
+        <button class="btn btn-link" onclick="toast('Export started (prototype)')">${EXPORT_ICON} Export</button>
+        <button class="btn btn-link" onclick="toast('Actuals updated.')">${REFRESH_ICON} Update</button>
+      </span>
+    </div>
+    <div class="actuals-scroll">
+      <table class="actuals-table">
+        <thead><tr><th>Task1</th><th>Task2</th><th>Task3</th><th>Task4</th><th>Actual Quantity</th><th>Quantity Difference</th><th>Planned Unit Rate/h</th><th>Actual Unit Rate/h</th><th>Unit Rate Difference</th></tr></thead>
+        <tbody><tr>
+          <td>Excavator</td><td>100㎥</td><td>100㎥</td><td>---</td>
+          <td>98 (-2)</td><td class="diff-neg">-2</td><td>$8</td><td>$7.74</td><td class="diff-pos">$+.26</td>
+        </tr></tbody>
+      </table>
+    </div>
+    <div class="rd-section">
+      <div class="rd-section-head"><h4>Transport Vehicle</h4><span class="meta">${rdSyncChips()}</span></div>
+      <div class="actuals-scroll">
+        <table class="actuals-table">
+          <thead><tr><th>Name</th><th>Category</th><th>Specification</th><th>Quantity</th><th>Ave. Transport Distance</th><th>Haul Count/Unit</th><th>Ave. Operating Hrs</th><th>Ave. Operating Rate</th><th>Memo</th></tr></thead>
+          <tbody>
+            <tr><td>Dump Truck</td><td>--</td><td>10t Dump</td><td>2 units</td><td>4.0 km</td><td>6 trips</td><td>7</td><td>${rdBar(75)}</td>${rdMemo('Hauling clear…')}</tr>
+            <tr><td>Low-bed Trailer</td><td>--</td><td>25t Low-Bed Type</td><td>1 units</td><td>15.0 km</td><td>1 trip</td><td>3</td><td>${rdBar(70)}</td>${rdMemo('Equipment…')}</tr>
+            <tr><td>Water Tanker Truck</td><td>--</td><td>4,000L Tank Truck</td><td>1 units</td><td>3.0 km</td><td>4 trips</td><td>5</td><td>${rdBar(75)}</td>${rdMemo('Dust suppres…')}</tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="btn primary btn-sm rd-details-btn" onclick="toast('Transport Vehicle details (prototype)')">see details ▸</button>
+    </div>
+    <div class="rd-section">
+      <div class="rd-section-head"><h4>Machine</h4><span class="meta">${rdSyncChips()}</span></div>
+      <div class="actuals-scroll">
+        <table class="actuals-table">
+          <thead><tr><th>Name</th><th>Category</th><th>Specification</th><th>Quantity</th><th>Operating Rate</th><th>Ave. Operating Hrs</th><th>Memo</th></tr></thead>
+          <tbody>
+            <tr><td>Chainsaw</td><td>--</td><td>Engine Type 60cc / 45cm bar</td><td>4</td><td>${rdBar(70)}</td><td>7h</td>${rdMemo('Tree &amp; shrub felling')}</tr>
+            <tr><td>Bulldozer</td><td>--</td><td>15t Class — Komatsu D65EX</td><td>1</td><td>${rdBar(75)}</td><td>8h</td>${rdMemo('Grubbing, grading &amp; slo…')}</tr>
+            <tr><td>Hydraulic Excavator (Backhoe)</td><td>--</td><td>0.45m³ — Komatsu PC200</td><td>1</td><td>${rdBar(75)}</td><td>7h</td>${rdMemo('Stump removal &amp; rough…')}</tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="btn primary btn-sm rd-details-btn" onclick="toast('Machine details (prototype)')">see details ▾</button>
+    </div>
+    <div class="rd-section">
+      <div class="rd-section-head"><h4>Labor</h4><span class="meta">${rdSyncChips()}</span></div>
+      <div class="actuals-scroll">
+        <table class="actuals-table">
+          <thead><tr><th>Name</th><th>Category</th><th>Specification</th><th>Total Headcount</th><th>Memo</th></tr></thead>
+          <tbody>
+            <tr><td>James Mitchell</td><td>--</td><td>Foreman</td><td>1 person</td>${rdMemo('Overall schedule management, q…')}</tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="btn primary btn-sm rd-details-btn" onclick="toast('Labor details (prototype)')">see details ▸</button>
+    </div>`;
+  $('actResDrawer').classList.add('show');
+  $('actResDrawerScrim').classList.add('show');
+}
+function closeActResDrawer(){
+  $('actResDrawer').classList.remove('show');
+  $('actResDrawerScrim').classList.remove('show');
+}
+
+/* ---- landing tab (deep-linkable: ?tab=cumulative|daily|summary) ---- */
+const startTab = new URLSearchParams(location.search).get('tab');
+switchTab(['cumulative','daily','summary'].includes(startTab) ? startTab : 'daily');
+</script>
+</body>
+</html>
