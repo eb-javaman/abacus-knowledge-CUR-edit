@@ -1,0 +1,172 @@
+/* =====================================================================
+   Abacus unified button system — single source of truth.
+   Loaded AFTER each page's inline <style> so these rules win.
+
+   Variants
+     primary   : indigo-500 bg, white text
+     secondary : white bg, indigo-500 text, 1px indigo-500 border
+     tertiary  : white bg, indigo-500 text, no border
+   Sizes
+     large  : 8px 12px / 16px / r8
+     medium : 8px 12px / 14px / r8
+     small  : 4px 8px  / 12px / r8
+     xs     : 2px 4px  / 10px / r4
+
+   Mapping (existing classes → system)
+     primary lg : #newBtn, .btn-register, .modal .btn-confirm
+     primary md : .btn-primary, .btn.primary (planning), .btn-planning
+     primary sm : .btn.btn-sm.primary (planning)
+     secondary lg : .modal .btn-cancel
+     secondary md : .btn-outline, .res-btn, .btn (planning plain),
+                    .btn.secondary (planning), .btn-bidresult
+     secondary sm : .btn-add-cond, .sc-foot button, .btn.btn-sm (planning)
+     secondary xs : .toast .t-retry
+     tertiary md  : .btn-text, .btn.ghost-icon, .btn.ghost, .btn.btn-link,
+                    .btn.export-btn (planning)
+     tertiary sm  : .res-add, .link-override
+     danger (lg sizing, red kept) : .btn-danger
+===================================================================== */
+
+/* ---------- base (all mapped buttons) ---------- */
+#newBtn, .btn-register, .btn-confirm,
+.btn-primary, .btn.primary, .btn-planning,
+.btn-cancel, .btn-outline, .btn, .btn-bidresult, .sim-sync .sim-btn,
+.btn-add-cond, .sc-foot button, .btn.btn-sm, .btn.btn-xs
+.toast .t-retry,
+.btn-text, .res-add, .link-override,
+.btn-danger {
+  font-family: inherit;
+  font-weight: 400;
+  line-height: 1.4;
+  height: auto;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent; /* keeps primary/secondary/tertiary heights equal */
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+/* Resources Details / View All Records stay full-width block buttons */
+.res-btn { font-weight: 400; line-height: 1.4; cursor: pointer; border: 1px solid transparent; }
+
+/* ---------- sizes ---------- */
+/* large */
+#newBtn, .btn-register, .btn-confirm, .btn-cancel, .btn-danger {
+  padding: 8px 12px; font-size: 16px; border-radius: 8px;
+}
+/* medium */
+.btn-primary, .btn.primary, .btn-planning,
+.btn-outline, .res-btn, .btn, .btn.secondary, .btn-bidresult, .sim-sync .sim-btn,
+.btn-text, .btn.ghost-icon, .btn.ghost, .btn.btn-link, .btn.export-btn {
+  padding: 6px 12px; font-size: 14px; border-radius: 8px;
+}
+/* small */
+.btn-add-cond, .sc-foot button,
+.res-add, .link-override {
+  padding: 4px 8px; font-size: 12px; border-radius: 8px;
+}
+.btn.btn-sm {
+  border-radius: 4px;
+}
+/* xs */
+.toast .t-retry,
+.btn.btn-xs {
+  padding: 2px 4px; font-size: 10px; border-radius: 4px; height: auto;
+}
+.btn.btn-xs {border: solid 1px #2F3137; color: #2F3137;}
+.btn.btn-xs:hover:not(:disabled) {
+  background: var(--indigo-50);
+  color: var(--indigo-600, #1D14C8);
+  border-color: var(--indigo-600, #1D14C8);
+}
+
+/* ---------- primary ---------- */
+#newBtn, .btn-register, .btn-confirm,
+.btn-primary, .btn.primary, .btn-planning,
+.btn.btn-sm.primary {
+  background: var(--indigo-500, #2F24E6);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 400;
+}
+#newBtn:hover:not(:disabled), .btn-register:hover:not(:disabled), .btn-confirm:hover:not(:disabled),
+.btn-primary:hover:not(:disabled), .btn.primary:hover:not(:disabled), .btn-planning:hover:not(:disabled),
+.btn.btn-sm.primary:hover:not(:disabled) {
+  background: var(--indigo-600, #1D14C8);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* ---------- secondary ---------- */
+.btn-cancel, .btn-outline, .res-btn, .btn, .btn.secondary, .btn-bidresult, .sim-sync .sim-btn,
+.btn-add-cond, .sc-foot button, .btn.btn-sm,
+.toast .t-retry {
+  background: var(--white, #FFFFFF);
+  color: var(--indigo-500, #2F24E6);
+  border: 1px solid var(--indigo-500, #2F24E6);
+  font-weight: 400;
+}
+.btn-cancel:hover:not(:disabled), .btn-outline:hover:not(:disabled), .res-btn:hover:not(:disabled),
+.btn:hover:not(:disabled), .btn.secondary:hover:not(:disabled), .btn-bidresult:hover:not(:disabled),
+.sim-sync .sim-btn:hover:not(:disabled),
+.btn-add-cond:hover:not(:disabled), .sc-foot button:hover:not(:disabled), .btn.btn-sm:hover:not(:disabled),
+.toast .t-retry:hover:not(:disabled) {
+  background: var(--indigo-50);
+  color: var(--indigo-600, #1D14C8);
+  border-color: var(--indigo-600, #1D14C8);
+}
+
+/* ---------- tertiary ---------- */
+.btn-text, .btn.ghost-icon, .btn.ghost, .btn.btn-link, .btn.export-btn,
+.res-add, .link-override {
+  background: none;
+  color: var(--indigo-500, #2F24E6);
+  border: 1px solid transparent;
+  font-weight: 400;
+}
+.btn-text:hover:not(:disabled), .btn.ghost-icon:hover:not(:disabled), .btn.ghost:hover:not(:disabled),
+.btn.btn-link:hover:not(:disabled), .btn.export-btn:hover:not(:disabled),
+.res-add:hover:not(:disabled), .link-override:hover:not(:disabled) {
+  background: #F0EFFB;
+  color: var(--indigo-600, #1D14C8);
+  border-color: transparent;
+  text-decoration: none;
+}
+
+/* ---------- danger (red kept, sizing conformed) ---------- */
+.btn-danger { background: var(--danger, #D8202B); color: #fff; border-color: transparent; }
+.btn-danger:hover:not(:disabled) { background: #B81820; }
+.btn.danger-ghost { color: var(--red-600, #C53F46); background: var(--white, #FFFFFF); border-color: transparent; }
+
+/* ---------- disabled (uniform) ---------- */
+#newBtn:disabled, .btn-register:disabled, .btn-confirm:disabled,
+.btn-primary:disabled, .btn.primary:disabled, .btn-planning:disabled,
+.btn-cancel:disabled, .btn-outline:disabled, .btn:disabled, .btn-bidresult,
+.btn-add-cond:disabled, .sc-foot button:disabled, .btn.btn-sm:disabled,
+.btn-text:disabled, .res-add:disabled, .link-override:disabled, .btn-danger:disabled,
+.sim-sync .sim-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* icons inside mapped buttons scale with the button */
+.btn-register svg, .btn-add-cond svg, .sc-foot button svg, .res-add svg, .link-override svg {
+  width: 1.1em; height: 1.1em;
+}
+
+/* =====================================================================
+   Unified side navigation (cur.html / index.html / PlanningSitelist.html)
+   hover  : indigo-50 background
+   active : indigo-300 background, white text
+===================================================================== */
+.sidebar .nav-item:hover {
+  background: var(--indigo-50, #E5E4FB);
+}
+.sidebar .nav-item.active,
+.sidebar .nav-item.active:hover {
+  background: var(--indigo-300, #736CED);
+  color: var(--white, #FFFFFF);
+  font-weight: 700;
+  box-shadow: none;
+}
