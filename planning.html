@@ -827,21 +827,24 @@
   table.ep tbody tr.selected.expanded > td { background:var(--indigo-50); }
 
   /* ---------- Frozen columns (sticky during horizontal scroll) ----------
-     Left-frozen: Task Lv1–Lv4
+     Left-frozen: expand toggle, Task Lv1–Lv4
      Right-frozen: Amount, Actions */
+  table.ep .col-expand,
   table.ep .col-lv1, table.ep .col-lv2, table.ep .col-lv3, table.ep .col-lv4,
   table.ep .col-amount, table.ep .col-actions {
     position:sticky; z-index:2; background:var(--white);
   }
+  table.ep thead .col-expand,
   table.ep thead .col-lv1, table.ep thead .col-lv2, table.ep thead .col-lv3, table.ep thead .col-lv4,
   table.ep thead .col-amount, table.ep thead .col-actions {
     z-index:3; background:var(--neutral-50);
   }
   /* Fixed widths so sticky offsets line up */
-  table.ep .col-lv1 { left:0;     min-width:140px; max-width:140px; }
-  table.ep .col-lv2 { left:140px; min-width:120px; max-width:120px; }
-  table.ep .col-lv3 { left:260px; min-width:150px; max-width:150px; }
-  table.ep .col-lv4 { left:410px; min-width:120px; max-width:120px; }
+  table.ep .col-expand { left:0;  min-width:32px;  max-width:48px; }
+  table.ep .col-lv1 { left:48px;  min-width:140px; max-width:140px; }
+  table.ep .col-lv2 { left:188px; min-width:120px; max-width:120px; }
+  table.ep .col-lv3 { left:308px; min-width:150px; max-width:150px; }
+  table.ep .col-lv4 { left:458px; min-width:120px; max-width:120px; }
   table.ep .col-amount  { right:100px; min-width:110px; max-width:110px; }
   table.ep .col-actions { right:0;     min-width:100px; max-width:100px; }
   /* Separators at the freeze boundaries — gradient pseudo-elements gated on persistent scroll state.
@@ -870,24 +873,28 @@
   .table-scroll.is-scrolled-left  table.ep .col-lv4::after  { opacity:1; }
   .table-scroll.is-scrolled-right table.ep .col-amount::before { opacity:1; }
   /* Row-state backgrounds for sticky body cells (must paint per-cell since sticky sits above tr bg) */
+  table.ep tbody tr.row-alt > td.col-expand,
   table.ep tbody tr.row-alt > td.col-lv1,
   table.ep tbody tr.row-alt > td.col-lv2,
   table.ep tbody tr.row-alt > td.col-lv3,
   table.ep tbody tr.row-alt > td.col-lv4,
   table.ep tbody tr.row-alt > td.col-amount,
   table.ep tbody tr.row-alt > td.col-actions { background:var(--neutral-50); }
+  table.ep tbody tr:hover > td.col-expand,
   table.ep tbody tr:hover > td.col-lv1,
   table.ep tbody tr:hover > td.col-lv2,
   table.ep tbody tr:hover > td.col-lv3,
   table.ep tbody tr:hover > td.col-lv4,
   table.ep tbody tr:hover > td.col-amount,
   table.ep tbody tr:hover > td.col-actions { background:var(--neutral-50); }
+  table.ep tbody tr.expanded > td.col-expand,
   table.ep tbody tr.expanded > td.col-lv1,
   table.ep tbody tr.expanded > td.col-lv2,
   table.ep tbody tr.expanded > td.col-lv3,
   table.ep tbody tr.expanded > td.col-lv4,
   table.ep tbody tr.expanded > td.col-amount,
   table.ep tbody tr.expanded > td.col-actions { background:var(--indigo-50); }
+  table.ep tbody tr.selected > td.col-expand,
   table.ep tbody tr.selected > td.col-lv1,
   table.ep tbody tr.selected > td.col-lv2,
   table.ep tbody tr.selected > td.col-lv3,
@@ -1189,7 +1196,7 @@
       <table class="ep">
         <thead>
           <tr>
-            <th style="width:32px"></th>
+            <th class="col-expand" style="width:32px"></th>
             <th class="col-lv1">Task (Lv1)<span class="req">*</span></th>
             <th class="col-lv2">Task (Lv2)</th>
             <th class="col-lv3">Task (Lv3)</th>
@@ -1809,7 +1816,7 @@ $('t-close').addEventListener('click', hideToast);
    These classes drive the freeze-boundary shadow and are updated on scroll, resize, and initial render. */
 /* Recompute sticky left/right offsets for frozen columns based on current th widths.
    Called after resize and after every render() (since the tbody is rebuilt with fresh tds). */
-const STICKY_LEFT_COLS  = ['col-lv1','col-lv2','col-lv3','col-lv4'];
+const STICKY_LEFT_COLS  = ['col-expand','col-lv1','col-lv2','col-lv3','col-lv4'];
 const STICKY_RIGHT_COLS = ['col-actions','col-amount']; // outer → inner
 function updateStickyOffsets() {
   let leftAcc = 0;
@@ -2065,7 +2072,7 @@ function render() {
     if (isExpanded) tr.classList.add('expanded');
     if (isSelected) tr.classList.add('selected');
     tr.innerHTML = `
-      <td>
+      <td class="col-expand">
         <button class="expand-btn ${isExpanded?'open':''}" onclick="toggleExpand('${r.id}')" title="${isExpanded?'Collapse':'Expand'} tasks" aria-label="${isExpanded?'Collapse':'Expand'}"><svg viewBox="0 0 12 12" width="10" height="10" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </td>
       <td class="col-lv1">${cellInput(r.id,'lv1', r.lv1, {placeholder:'e.g. Earthwork (Fill)', listId:'dl_lv1'})}</td>
