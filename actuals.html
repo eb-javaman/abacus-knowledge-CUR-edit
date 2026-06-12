@@ -37,7 +37,7 @@
   .topbar .right { margin-left:auto; display:flex; gap:12px; align-items:center; color:var(--neutral-700); }
 
   /* ---------- Page header ---------- */
-  .page-header { background:var(--white); border-bottom:1px solid var(--neutral-200); padding:12px; }
+  .page-header { background:var(--white); border-bottom:1px solid var(--neutral-200); padding:12px; display:flex;flex-direction:column;gap:16px; }
   .breadcrumb { font-size:12px; color:var(--neutral-600); display:flex; align-items:center; gap:6px; }
   .breadcrumb a { color:var(--neutral-600); text-decoration:none; cursor:pointer; }
   .breadcrumb a:hover { color:var(--indigo-500); }
@@ -58,18 +58,20 @@
   .tab.active { color:var(--indigo-600); border-bottom-color:var(--indigo-500); font-weight:600; }
 
   /* ---------- Actuals shared header ---------- */
-  .actuals-meta .chips { display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .actuals-meta {display:flex; flex-direction:column; gap:8px;}
+  .actuals-meta .chips { display:flex; align-items:center; gap:12px; }
   .actuals-chip {
     display:inline-flex; align-items:center; gap:6px;
-    background:var(--indigo-50); border-radius:6px; padding:5px 10px;
+    background:var(--indigo-50); border-radius:6px; padding:4px 8px;
     font-size:12px; color:var(--neutral-700);
   }
   .actuals-chip strong { color:var(--neutral-900); }
   .actuals-chip .ic { width:13px; height:13px; }
-  .kpi-bar { display:flex; gap:28px; margin-top:10px; flex-wrap:wrap; }
-  .kpi { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--neutral-700); }
-  .kpi b { color:var(--neutral-900); font-size:13px; }
-  .kpi .track { width:110px; height:8px; border-radius:999px; background:var(--neutral-200); overflow:hidden; }
+  .kpi-bar { display:flex; gap:32px;}
+  .kpi { display:flex;align-items:center; gap:4px; font-size:10px; color:var(--neutral-700);width:100%;}
+  .kpi p {width:auto; margin:0;}
+  .kpi strong { color:var(--neutral-900); font-size:12px; }
+  .kpi .track { width:30%; height:8px; border-radius:999px; background:var(--neutral-200); overflow:hidden; }
   .kpi .fill, .actuals-cellbar .fill {
     height:100%; border-radius:999px;
     background:linear-gradient(90deg, var(--green-500), #19B5A6 60%, var(--indigo-300));
@@ -251,11 +253,11 @@
       <span class="actuals-chip">Construction Period <strong>mm/dd/yyyy - mm/dd/yyyy</strong></span>
     </div>
     <div class="kpi-bar">
-      <span class="kpi">Total Start Rate: <b>50%</b><span class="track"><span class="fill" style="display:block;width:50%"></span></span></span>
-      <span class="kpi">Total Elapsed Time Rate <b>60%</b><span class="track"><span class="fill" style="display:block;width:60%"></span></span></span>
-      <span class="kpi">Total Progress Rate <b>80%</b><span class="track"><span class="fill" style="display:block;width:80%"></span></span></span>
-      <span class="kpi">Total Cost Rate <b>40%</b><span class="track"><span class="fill" style="display:block;width:40%"></span></span></span>
-      <span class="kpi">Total Expenditure Rate <b>80%</b><span class="track"><span class="fill" style="display:block;width:80%"></span></span></span>
+      <div class="kpi"><p>Total Start Rate: <strong>50%</strong></p><span class="track"><span class="fill" style="display:block;width:50%"></span></span></div>
+      <div class="kpi"><p>Total Elapsed Time Rate <strong>60%</strong></p><span class="track"><span class="fill" style="display:block;width:60%"></span></span></div>
+      <div class="kpi"><p>Total Progress Rate <strong>80%</strong></p><span class="track"><span class="fill" style="display:block;width:80%"></span></span></div>
+      <div class="kpi"><p>Total Cost Rate <strong>40%</strong></p><span class="track"><span class="fill" style="display:block;width:40%"></span></span></div>
+      <div class="kpi"><p>Total Expenditure Rate <strong>80%</strong></p><span class="track"><span class="fill" style="display:block;width:80%"></span></span></div>
     </div>
   </div>
 
@@ -515,8 +517,31 @@ function renderDaily(panel){
 }
 
 /* ---- Tab: Summary ---- */
-const AS_DAYS = Array.from({length:15}, (_,i) => 14 + i);
-const AS_OFFDAYS = new Set([14, 20, 21, 27, 28]);
+/* Calendar columns: one cell per day of the visible range.
+   Default = the sample month (Aug 2026, matching "last synced: 2026.08.26");
+   filling both date-range inputs re-renders with that range.
+   Weekends are non-working days (red tint + NA). */
+const AS_DEFAULT_START = new Date(2026, 7, 1);
+const AS_DEFAULT_END   = new Date(2026, 7, 31);
+const AS_MAX_DAYS = 92; // safety cap for very wide ranges
+function asBuildDays(start, end){
+  const days = [];
+  const d = new Date(start);
+  while (d <= end && days.length < AS_MAX_DAYS){
+    const dow = d.getDay();
+    days.push({ day: d.getDate(), off: dow === 0 || dow === 6 });
+    d.setDate(d.getDate() + 1);
+  }
+  return days;
+}
+let asDays = asBuildDays(AS_DEFAULT_START, AS_DEFAULT_END);
+let asFromVal = '', asToVal = '';
+function asParseMDY(v){
+  const m = (v || '').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  const d = new Date(+m[3], +m[1] - 1, +m[2]);
+  return isNaN(d.getTime()) ? null : d;
+}
 const AS_EXCAVATION_ROWS = [
   ['Dump','--','$128.83','128h','$128.83'],
   ['Dump','--','$128.83','128h','$128.83'],
@@ -529,11 +554,10 @@ const AS_EXCAVATION_ROWS = [
   ['Excavator','0.7m³','$128.83','96h','$13,920.00']
 ];
 function asDayCells(kind){
-  return AS_DAYS.map(d => {
-    const off = AS_OFFDAYS.has(d);
-    if (kind === 'empty') return `<td class="day-col${off ? ' offday' : ''}"></td>`;
+  return asDays.map(c => {
+    if (kind === 'empty') return `<td class="day-col${c.off ? ' offday' : ''}"></td>`;
     if (kind === 'na-all') return `<td class="day-col na">NA</td>`;
-    return off ? '<td class="day-col offday na">NA</td>' : '<td class="day-col">8</td>';
+    return c.off ? '<td class="day-col offday na">NA</td>' : '<td class="day-col">8</td>';
   }).join('');
 }
 function asStickyCells(vals){
@@ -551,7 +575,7 @@ function renderSummary(panel){
       ${['Transport Vehicle','Machinery','Labor'].map(c => `
         <label class="radio"><input type="radio" name="asCat" value="${c}" ${c === cat ? 'checked' : ''}/> ${c}</label>`).join('')}
       <span class="date-range">
-        <input placeholder="00/00/0000" /> <span>~</span> <input placeholder="00/00/0000" />
+        <input id="asFrom" placeholder="00/00/0000" value="${asFromVal}" /> <span>~</span> <input id="asTo" placeholder="00/00/0000" value="${asToVal}" />
       </span>
       <span style="flex:1"></span>
       <span class="src-label">Data Source:</span>
@@ -566,7 +590,7 @@ function renderSummary(panel){
       <table class="as-table">
         <thead><tr>
           ${['Name','Standard','Unit Rate','Total Quantity','Total Amount'].map((h,i) => `<th class="as-c${i+1}">${h}${SORT_ICON}</th>`).join('')}
-          ${AS_DAYS.map(d => `<th class="day-col${AS_OFFDAYS.has(d) ? ' offday' : ''}">${d}</th>`).join('')}
+          ${asDays.map(c => `<th class="day-col${c.off ? ' offday' : ''}">${c.day}</th>`).join('')}
         </tr></thead>
         <tbody>
           <tr class="as-group">${asStickyCells(['Excavation','--','--','--','$1,288.31'])}${asDayCells('empty')}</tr>
@@ -580,6 +604,14 @@ function renderSummary(panel){
   </div>`;
   $('asFilter').addEventListener('click', () => toast('Filter (prototype)'));
   $('asExport').addEventListener('click', () => toast('Export started (prototype)'));
+  // date range → rebuild the calendar columns (falls back to the default month)
+  ['asFrom','asTo'].forEach(id => $(id).addEventListener('change', () => {
+    asFromVal = $('asFrom').value;
+    asToVal = $('asTo').value;
+    const from = asParseMDY(asFromVal), to = asParseMDY(asToVal);
+    asDays = (from && to && from <= to) ? asBuildDays(from, to) : asBuildDays(AS_DEFAULT_START, AS_DEFAULT_END);
+    renderSummary(panel);
+  }));
   panel.querySelectorAll('input[name=asCat]').forEach(r => r.addEventListener('change', () => {
     A.summaryCategory = r.value;
     persist();
