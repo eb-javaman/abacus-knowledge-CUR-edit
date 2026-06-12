@@ -141,7 +141,7 @@
   .day-nav svg { width:12px; height:12px; }
 
   /* ---------- Summary table ---------- */
-  .as-controls { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:12px 16px; border-bottom:1px solid var(--neutral-200); font-size:12.5px; }
+  .as-controls { display:flex; align-items:center; flex-wrap:wrap; padding:12px 16px; border-bottom:1px solid var(--neutral-200); font-size:12.5px; }
   .as-controls label.radio { display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:var(--neutral-800); }
   .as-controls input[type=radio] { accent-color:var(--indigo-500); }
   .as-controls .date-range { display:inline-flex; align-items:center; gap:6px; }
@@ -181,7 +181,7 @@
   }
   .drawer-scrim.show { opacity:1; pointer-events:auto; }
   .drawer {
-    position:fixed; top:0; right:0; bottom:0; width:min(900px, 80vw); max-width:96vw;
+    position:fixed; top:0; right:0; bottom:0; width:min(900px, 80vw); width:90vw;
     background:var(--white); border-left:1px solid var(--neutral-200);
     box-shadow:-12px 0 32px rgba(0,0,0,.12); transform:translateX(100%);
     transition:transform .22s ease; z-index:95; display:flex; flex-direction:column;
@@ -206,6 +206,19 @@
   }
   .rd-edit svg { width:13px; height:13px; }
   .rd-details-btn { margin-top:10px; }
+  .rd-details-btn .rd-chev { font-size:10px; margin-left:4px; }
+  /* expandable Details block per resource section (collapsed by default) */
+  .rd-details { margin-top:14px; }
+  .rd-details[hidden] { display:none; }
+  .rd-details-label { color:var(--indigo-500); font-size:13px; margin-bottom:8px; }
+  .cell-warn { background:var(--red-50) !important; }
+  .cell-warn .cw { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .warn-ic { display:inline-flex; color:#E07A00; }
+  .warn-ic svg { width:14px; height:14px; }
+  .op-dist { display:inline-flex; width:130px; height:10px; border-radius:2px; overflow:hidden; }
+  .op-dist i { height:100%; display:block; }
+  .info-ic { display:inline-flex; vertical-align:-2px; margin-left:4px; color:var(--neutral-500); }
+  .info-ic svg { width:13px; height:13px; }
   .icon-x { background:none; border:none; cursor:pointer; color:var(--neutral-600); padding:4px; }
   .icon-x:hover { color:var(--neutral-900); }
   .icon-x svg { width:16px; height:16px; }
@@ -506,7 +519,7 @@ function renderDaily(panel){
             <td>${r.pur}</td>
             <td>${r.aur ?? '<span class="muted-na">--</span>'}</td>
             <td>${actDiff(r.urd)}</td>
-            <td><button class="btn btn-sm" data-details="${i}">details</button></td>
+            <td><button class="btn btn-xs" data-details="${i}">details</button></td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -652,6 +665,14 @@ function rdBar(p){
 function rdMemo(text){
   return `<td>${text} <button class="rd-edit" title="Edit memo">${PENCIL_ICON}</button></td>`;
 }
+const WARN_ICON = '<span class="warn-ic"><svg viewBox="0 0 20 20" fill="none"><path d="M10 3 2.5 16h15L10 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="14" r=".9" fill="currentColor"/></svg></span>';
+const INFO_ICON = '<span class="info-ic"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.25" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="6.4" r=".9" fill="currentColor"/></svg></span>';
+function rdWarnCell(val){
+  return `<td class="cell-warn"><span class="cw">${val} ${WARN_ICON}</span></td>`;
+}
+function rdOpDist(b, g, r){
+  return `<span class="op-dist"><i style="width:${b}%;background:var(--indigo-500)"></i><i style="width:${g}%;background:var(--green-500)"></i><i style="width:${r}%;background:var(--red-500)"></i></span>`;
+}
 function openActResDrawer(rowIdx){
   const row = (A.daily['mm/dd/yyyy'] || ACT_DAILY_ROWS)[rowIdx] || {};
   $('actResBody').innerHTML = `
@@ -684,7 +705,21 @@ function openActResDrawer(rowIdx){
           </tbody>
         </table>
       </div>
-      <button class="btn primary btn-sm rd-details-btn" onclick="toast('Transport Vehicle details (prototype)')">see details ▸</button>
+      <button class="btn primary btn-sm rd-details-btn" data-toggle="rdDetTv">see details <span class="rd-chev">▸</span></button>
+      <div class="rd-details" id="rdDetTv" hidden>
+        <div class="rd-details-label">Details</div>
+        <div class="actuals-scroll">
+          <table class="actuals-table">
+            <thead><tr><th>Name</th><th>Category</th><th>Specification</th><th>Work Area</th><th>Hauling Distance</th><th>Haul Count</th><th>Fuel</th><th>Operating Hours</th></tr></thead>
+            <tbody>
+              <tr><td>Dump Truck No.1</td><td>Debris Hauling</td><td>10t Dump</td><td>Zone A — Clearing Area</td><td>4.0 km</td><td>6 Trips</td><td>42L</td><td>7h</td></tr>
+              <tr><td>Dump Truck No.2</td><td>Debris Hauling</td><td>10t Dump</td><td>Zone B — Clearing Area</td><td>4.0 km</td><td>6 Trips</td><td>42L</td><td>7h</td></tr>
+              <tr><td>Low bed Trailer</td><td>Equipment Transport</td><td>25t Low-Bed Trailer</td><td>Equipment Yard</td><td>15.0 km</td><td>1 Trips</td><td>18L</td>${rdWarnCell('3h')}</tr>
+              <tr><td>Water Tanker Truck</td><td>Water Spraying</td><td>4,000L Tank Truck</td><td>Zone A &amp; B — General</td><td>3.0 km</td><td>4 Trips</td><td>22L</td>${rdWarnCell('5h')}</tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="rd-section">
       <div class="rd-section-head"><h4>Machine</h4><span class="meta">${rdSyncChips()}</span></div>
@@ -698,7 +733,20 @@ function openActResDrawer(rowIdx){
           </tbody>
         </table>
       </div>
-      <button class="btn primary btn-sm rd-details-btn" onclick="toast('Machine details (prototype)')">see details ▾</button>
+      <button class="btn primary btn-sm rd-details-btn" data-toggle="rdDetMc">see details <span class="rd-chev">▸</span></button>
+      <div class="rd-details" id="rdDetMc" hidden>
+        <div class="rd-details-label">Details</div>
+        <div class="actuals-scroll">
+          <table class="actuals-table">
+            <thead><tr><th>Name</th><th>Category</th><th>Specification</th><th>Work Area</th><th>Work Details</th><th>Operating Rate</th><th>Ave. Operating Hrs</th><th>Fuel</th><th>Distance Travelled</th></tr></thead>
+            <tbody>
+              <tr><td>Chainsaw No.1 ~ 4</td><td>60cc / 45cm bar</td><td>0.7</td><td>Zone A &amp; Zone B</td><td>Tree felling, limbing, bucking (6 trees total)</td><td>${rdBar(70)}</td><td>7h</td><td>8L/unit</td><td class="muted-na">--</td></tr>
+              <tr><td>Bulldozer</td><td>D65EX / 15t</td><td>D61</td><td>Zone A &amp; B — Post-clearing area</td><td>Grubbing, debris clearing, slope shaping</td><td>${rdBar(75)}</td><td>8h</td>${rdWarnCell('75L')}<td>2.5km</td></tr>
+              <tr><td>Hydraulic Excavator No.1</td><td>PC200-8 / 0.45m³</td><td>0.7</td><td>Zone A &amp; B</td><td>Stump extraction, rough grading</td><td>${rdBar(75)}</td><td>7h</td><td>22L</td><td class="muted-na">--</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="rd-section">
       <div class="rd-section-head"><h4>Labor</h4><span class="meta">${rdSyncChips()}</span></div>
@@ -707,11 +755,38 @@ function openActResDrawer(rowIdx){
           <thead><tr><th>Name</th><th>Category</th><th>Specification</th><th>Total Headcount</th><th>Memo</th></tr></thead>
           <tbody>
             <tr><td>James Mitchell</td><td>--</td><td>Foreman</td><td>1 person</td>${rdMemo('Overall schedule management, q…')}</tr>
+            <tr><td>Robert Chen</td><td>--</td><td>Operator</td><td>1 person</td>${rdMemo('Bulldozer ×1, Backhoe ×1')}</tr>
+            <tr><td>Carlos Rodriquez</td><td>--</td><td>Skilled Worker</td><td>1 person</td>${rdMemo('Felling operations in Zone A &amp; B')}</tr>
+            <tr><td>Michael Thompson</td><td>--</td><td>General Worker</td><td>1 person</td>${rdMemo('Debris collection, timber stackin…')}</tr>
+            <tr><td>Sarah Williams</td><td>--</td><td>Skilled Worker</td><td>1 person</td>${rdMemo('Safety patrol, KY activity records')}</tr>
           </tbody>
         </table>
       </div>
-      <button class="btn primary btn-sm rd-details-btn" onclick="toast('Labor details (prototype)')">see details ▸</button>
+      <button class="btn primary btn-sm rd-details-btn" data-toggle="rdDetLb">see details <span class="rd-chev">▸</span></button>
+      <div class="rd-details" id="rdDetLb" hidden>
+        <div class="rd-details-label">Details</div>
+        <div class="actuals-scroll">
+          <table class="actuals-table">
+            <thead><tr><th>Name</th><th>Category</th><th>Specification</th><th>Work Details</th><th>Operating Hrs</th><th>Overtime</th><th>Break Time</th><th>Operation Distribution ${INFO_ICON}</th><th>メモ</th></tr></thead>
+            <tbody>
+              <tr><td>James Mitchell</td><td>Foreman</td><td>--</td><td>Schedule check, quality management, safety briefing, photo documentation</td><td>9h</td><td>1h</td><td>1h</td><td>${rdOpDist(50,22,28)}</td>${rdMemo('Attendance…')}</tr>
+              <tr><td>Robert Chen</td><td>Operator</td><td>--</td><td>Grubbing, debris pushing, slope shaping</td><td>8h</td><td class="muted-na">--</td><td>1h</td><td>${rdOpDist(70,18,12)}</td>${rdMemo('---')}</tr>
+              <tr><td>Carlos Rodriguez</td><td>Skilled Worker</td><td>--</td><td>Tree felling, limbing, bucking, timber stacking</td><td>7.5h</td><td class="muted-na">--</td><td>1h</td><td>${rdOpDist(45,35,20)}</td>${rdMemo('Helmet &amp; ch…')}</tr>
+              <tr><td>Michael Thompson</td><td>General Worker</td><td>--</td><td>Debris collection, branch chipping, site cleanup</td><td>8h</td><td class="muted-na">--</td><td>1h</td><td>${rdOpDist(60,25,15)}</td>${rdMemo('---')}</tr>
+              <tr><td>Sarah Williams</td><td>Skilled Worker</td><td>--</td><td>KY activity, safety patrol (AM/PM), near-miss recording</td><td>8h</td><td class="muted-na">--</td><td>1h</td><td>${rdOpDist(55,25,20)}</td>${rdMemo('No incidents…')}</tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>`;
+  // [see details] toggles — Details blocks are collapsed by default
+  $('actResBody').querySelectorAll('[data-toggle]').forEach(b => {
+    b.addEventListener('click', () => {
+      const det = $(b.dataset.toggle);
+      det.hidden = !det.hidden;
+      b.querySelector('.rd-chev').textContent = det.hidden ? '▸' : '▴';
+    });
+  });
   $('actResDrawer').classList.add('show');
   $('actResDrawerScrim').classList.add('show');
 }
