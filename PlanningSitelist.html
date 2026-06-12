@@ -258,6 +258,14 @@ const SVG = {
    state and not user-registered) are cleaned out. */
 const SITES_KEY = 'abacus.sites';
 function hasPlanState(id){ return !!localStorage.getItem('abacus.planning.' + id); }
+/* Acquire Performance Data finalizes the plan — the site leaves this page.
+   (It stays in abacus.sites: it will surface on Ongoing Sites later.) */
+function isFinalized(id){
+  try{
+    const snap = JSON.parse(localStorage.getItem('abacus.planning.' + id) || 'null');
+    return !!(snap && snap.acquired);
+  }catch(_e){ return false; }
+}
 function loadSites(){
   let list = [];
   try{ list = JSON.parse(localStorage.getItem(SITES_KEY) || '[]'); }catch(_e){ list = []; }
@@ -303,14 +311,16 @@ function estCell(variant){
 }
 
 function renderRows(){
-  if(!sites.length){
+  // finalized sites (Acquire pressed) no longer belong on this page
+  const visible = sites.filter(s => !isFinalized(s.id));
+  if(!visible.length){
     document.getElementById('rows').innerHTML = `
       <div class="empty-rows">
         No sites yet — click <b>Register site for Quotation</b> to get started.
       </div>`;
     return;
   }
-  document.getElementById('rows').innerHTML = sites.map(r=>`
+  document.getElementById('rows').innerHTML = visible.map(r=>`
     <div class="tbl-row ${r.status==='new' ? 'is-new' : ''}">
       <div class="site-cell">
         <span class="site-name">${r.name}</span>
