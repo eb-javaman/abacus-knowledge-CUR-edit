@@ -57,7 +57,7 @@
   .page-title-row {
     display:flex; align-items:flex-end; justify-content:space-between; margin-top:8px;
   }
-  .page-title { font-size:20px; font-weight:700; color:var(--neutral-900); }
+  .page-title { font-size:17px;font-weight:600;color:var(--text);margin:0 0 18px; }
   .timestamp { font-size:11px; color:var(--neutral-500); margin-top:2px; }
 
   .meta-row { display:flex; align-items:center; gap:8px; padding:2px 0 8px; flex-wrap:wrap; }
@@ -930,6 +930,7 @@
   .checks label { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--neutral-800); cursor:pointer; }
   .checks input[type=checkbox] { accent-color:var(--indigo-500); }
 </style>
+<link rel="stylesheet" href="buttons.css" />
 </head>
 <body>
 
@@ -1871,7 +1872,7 @@ function render() {
         : `<strong>${r.amount===''||r.amount==null ? '—' : fmt$(r.amount)}</strong>`}</td>
       <td class="col-memo">${cellInput(r.id,'memo', r.memo, {placeholder:'—'})}</td>
       <td class="col-actions">
-        <button class="btn btn-sm" onclick="event.stopPropagation(); openDetailsDrawer('${r.id}')" title="Details">Details</button>
+        <button class="btn btn-xs" onclick="event.stopPropagation(); openDetailsDrawer('${r.id}')" title="Details">Details</button>
       </td>
     `;
     tbody.appendChild(tr);
