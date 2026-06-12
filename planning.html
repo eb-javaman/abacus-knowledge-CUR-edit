@@ -929,6 +929,146 @@
   .checks { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; }
   .checks label { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--neutral-800); cursor:pointer; }
   .checks input[type=checkbox] { accent-color:var(--indigo-500); }
+
+  /* ============================================================
+     Actuals (post-acquire) — all rules scoped under .actuals-*
+  ============================================================ */
+  /* shared header: synced/period chips + KPI bar */
+  .actuals-meta { display:none; }
+  .actuals-meta.show { display:block; }
+  .actuals-meta .chips { display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .actuals-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--indigo-50); border-radius:6px; padding:5px 10px;
+    font-size:12px; color:var(--neutral-700);
+  }
+  .actuals-chip strong { color:var(--neutral-900); }
+  .actuals-chip .ic { width:13px; height:13px; }
+  .kpi-bar { display:flex; gap:28px; margin-top:10px; flex-wrap:wrap; }
+  .kpi { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--neutral-700); }
+  .kpi b { color:var(--neutral-900); font-size:13px; }
+  .kpi .track { width:110px; height:8px; border-radius:999px; background:var(--neutral-200); overflow:hidden; }
+  .kpi .fill, .actuals-cellbar .fill {
+    height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--green-500), #19B5A6 60%, var(--indigo-300));
+  }
+
+  /* panels */
+  .actuals-panel { display:none; }
+  .actuals-panel.show { display:block; }
+  .actuals-card {
+    background:var(--white); border:1px solid var(--neutral-200); border-radius:10px;
+    margin:14px 16px; overflow:hidden;
+  }
+  .actuals-subhead {
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:12px 16px; border-bottom:1px solid var(--neutral-200); font-size:13px;
+  }
+  .actuals-subhead .spacer { flex:1; }
+  .actuals-date { color:var(--indigo-500); font-weight:700; cursor:pointer; }
+  .actuals-date:hover { text-decoration:underline; }
+
+  /* pre-acquire placeholder */
+  .actuals-placeholder {
+    padding:64px 20px; text-align:center; color:var(--neutral-600);
+    font-size:13.5px; line-height:1.7;
+  }
+  .actuals-placeholder a { color:var(--indigo-500); font-weight:600; cursor:pointer; }
+
+  /* tables */
+  .actuals-scroll { overflow-x:auto; }
+  table.actuals-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.actuals-table th {
+    background:var(--neutral-100); color:var(--neutral-900); font-weight:700; text-align:left;
+    padding:9px 12px; border-bottom:1px solid var(--neutral-200); white-space:nowrap;
+  }
+  table.actuals-table td {
+    padding:10px 12px; border-bottom:1px solid var(--neutral-100);
+    color:var(--neutral-900); white-space:nowrap; vertical-align:middle;
+  }
+  table.actuals-table tbody tr:nth-child(even) td { background:var(--neutral-50); }
+  .th-sort { display:inline-flex; vertical-align:-2px; margin-left:6px; color:var(--neutral-500); cursor:pointer; }
+  .th-sort svg { width:12px; height:12px; }
+  .diff-neg { color:var(--red-600); }
+  .diff-pos { color:var(--green-700); }
+  .muted-na { color:var(--neutral-500); }
+  .actuals-cellbar { display:inline-flex; align-items:center; gap:8px; }
+  .actuals-cellbar .track { width:80px; height:8px; border-radius:999px; background:var(--neutral-200); overflow:hidden; flex:0 0 auto; }
+  .actuals-cellbar b { min-width:38px; font-weight:600; }
+
+  /* synced-from / data-source chips */
+  .chip-toggle {
+    background:var(--white); border:1px solid var(--neutral-300); border-radius:6px;
+    padding:4px 10px; font-size:11.5px; color:var(--neutral-700); cursor:pointer;
+  }
+  .chip-toggle:hover { border-color:var(--indigo-300); }
+  .chip-toggle.selected { border:1.5px solid var(--indigo-500); color:var(--indigo-600); font-weight:600; }
+  .chip-toggle.selected-solid { background:var(--indigo-500); border-color:var(--indigo-500); color:var(--white); font-weight:600; }
+  .chips-inline { display:inline-flex; align-items:center; gap:6px; }
+
+  /* daily prev/next */
+  .day-nav { display:inline-flex; align-items:center; gap:8px; }
+  .day-nav button {
+    width:26px; height:26px; border:1px solid var(--neutral-300); border-radius:6px;
+    background:var(--white); color:var(--neutral-700); display:inline-flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:0;
+  }
+  .day-nav button:hover { border-color:var(--indigo-400); color:var(--indigo-600); }
+  .day-nav svg { width:12px; height:12px; }
+
+  /* Actuals by Resource drawer (wider than the standard drawer) */
+  #actResDrawer { width:min(900px, 80vw); }
+  #actResDrawer .rd-crumb { font-size:13px; display:flex; align-items:center; gap:8px; }
+  #actResDrawer .rd-crumb a { color:var(--indigo-500); text-decoration:none; cursor:pointer; }
+  #actResDrawer .rd-meta { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+  #actResDrawer .rd-meta .date { color:var(--indigo-500); font-weight:700; }
+  .rd-section { border-top:1px solid var(--neutral-200); margin-top:20px; padding-top:14px; }
+  .rd-section-head { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .rd-section-head h4 { margin:0; font-size:14.5px; font-weight:700; color:var(--neutral-900); }
+  .rd-section-head .meta { margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--neutral-600); }
+  .rd-edit {
+    background:none; border:none; color:var(--indigo-400); cursor:pointer; padding:2px;
+    display:inline-flex; border:1px solid var(--indigo-200); border-radius:5px;
+  }
+  .rd-edit svg { width:13px; height:13px; }
+  .rd-details-btn { margin-top:10px; }
+
+  /* Summary tab */
+  .as-controls { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:12px 16px; border-bottom:1px solid var(--neutral-200); font-size:12.5px; }
+  .as-controls label.radio { display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:var(--neutral-800); }
+  .as-controls input[type=radio] { accent-color:var(--indigo-500); }
+  .as-controls .date-range { display:inline-flex; align-items:center; gap:6px; }
+  .as-controls .date-range input {
+    width:110px; border:1px solid var(--neutral-300); border-radius:6px; padding:5px 8px;
+    font-size:12px; font-family:inherit; color:var(--neutral-900);
+  }
+  .as-controls .src-label { color:var(--neutral-600); }
+  .as-controls .synced-note { font-size:11px; color:var(--neutral-500); }
+  table.as-table { border-collapse:collapse; font-size:12px; min-width:100%; }
+  table.as-table th, table.as-table td {
+    border-bottom:1px solid var(--neutral-100); padding:8px 10px; white-space:nowrap;
+    background:var(--white); color:var(--neutral-900); text-align:left;
+  }
+  table.as-table thead th { background:var(--neutral-100); font-weight:700; border-bottom:1px solid var(--neutral-200); }
+  table.as-table .day-col { text-align:center; min-width:44px; }
+  table.as-table .offday { background:var(--red-50) !important; }
+  table.as-table .na { color:var(--red-300); font-style:italic; text-align:center; }
+  /* sticky first 5 columns */
+  table.as-table .as-c1, table.as-table .as-c2, table.as-table .as-c3,
+  table.as-table .as-c4, table.as-table .as-c5 { position:sticky; z-index:2; }
+  table.as-table thead .as-c1, table.as-table thead .as-c2, table.as-table thead .as-c3,
+  table.as-table thead .as-c4, table.as-table thead .as-c5 { z-index:3; }
+  table.as-table .as-c1 { left:0;     min-width:130px; max-width:130px; }
+  table.as-table .as-c2 { left:130px; min-width:86px;  max-width:86px; }
+  table.as-table .as-c3 { left:216px; min-width:86px;  max-width:86px; }
+  table.as-table .as-c4 { left:302px; min-width:104px; max-width:104px; }
+  table.as-table .as-c5 { left:406px; min-width:104px; max-width:104px; border-right:1px solid var(--neutral-300); }
+  /* group + footer rows */
+  table.as-table tr.as-group td {
+    background:var(--indigo-700) !important; color:var(--white); font-weight:700;
+    border-bottom:none;
+  }
+  table.as-table tr.as-group td.na, table.as-table tr.as-group td.offday { background:var(--indigo-700) !important; color:var(--white); }
 </style>
 <link rel="stylesheet" href="buttons.css" />
 </head>
@@ -972,7 +1112,7 @@
   </div>
 
   <div class="page-title-row">
-    <div class="meta-row">
+    <div class="meta-row" id="planningMetaRow">
       <div id="lastEdited" class="meta-last-edited">
         <svg class="ic" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         <span>Last Edited: 00:00 mm/dd/yyyy</span>
@@ -990,11 +1130,11 @@
 
   <!-- Tabs + Search -->
   <div class="tabs-row">
-    <div class="tabs">
-      <div class="tab active">Execution Planning</div>
-      <div class="tab">Actuals (Cumulative)</div>
-      <div class="tab">Actuals (Daily)</div>
-      <div class="tab">Actuals (Summary)</div>
+    <div class="tabs" id="mainTabs">
+      <div class="tab active" data-tab="planning">Execution Planning</div>
+      <div class="tab" data-tab="cumulative">Actuals (Cumulative)</div>
+      <div class="tab" data-tab="daily">Actuals (Daily)</div>
+      <div class="tab" data-tab="summary">Actuals (Summary)</div>
     </div>
     <div class="tabs-right">
       <button id="btnExport" class="btn export-btn" title="Export" disabled>
@@ -1011,6 +1151,8 @@
 
 <!-- ========== MAIN ========== -->
 <main>
+<!-- Execution Planning panel -->
+<div id="panelPlanning">
   <!-- Empty state (no plan yet) -->
   <div id="emptyState" class="empty">
     <h3>No plan selected</h3>
@@ -1094,7 +1236,16 @@
       </div>
     </div>
   </div>
+</div><!-- /panelPlanning -->
+
+<!-- Actuals panels (rendered by JS) -->
+<div id="panelCumulative" class="actuals-panel"></div>
+<div id="panelDaily" class="actuals-panel"></div>
+<div id="panelSummary" class="actuals-panel"></div>
 </main>
+
+<!-- The Actuals by Resource drawer lives in actuals.html -->
+
 
 <!-- ========== MODAL: Create Plan ========== -->
 <div id="createPlanModal" class="scrim">
@@ -1520,6 +1671,39 @@ window.addEventListener('beforeunload', () => {
   if (saved) Object.assign(state, saved);
 })();
 
+/* Finalization handoff: once a plan is submitted via Acquire Performance Data
+   it is archived under state.actuals (rendered by actuals.html) and Execution
+   Planning resets to a fresh state for this site. */
+function resetPlanningToFresh() {
+  Object.assign(state, {
+    planName: null, lastEdited: null, lastImported: null,
+    simulationRun: false, imported: false,
+    expanded: new Set(), selectedId: null,
+    editMode: false, rowsBackup: null,
+    dirty: false, dirtyPlanning: false, dirtyCost: false,
+    simNeedsRefresh: false, simHasNewer: false,
+    acquired: false,            // the lock travels with the archived plan, not the fresh editor
+    rows: [], curByRow: {}, resourceOverrides: {},
+    _activeRowId: null, _drawerSnapshot: null,
+  });
+}
+function persistPlanningSnapshotNow() {
+  if (!SITE_ID) return;
+  try {
+    localStorage.setItem('abacus.planning.' + SITE_ID,
+      JSON.stringify(Object.assign({}, state, { expanded: [...state.expanded] })));
+  } catch (_e) { /* storage unavailable — prototype */ }
+}
+
+// Migrate legacy snapshots saved before the actuals.html split:
+// acquired===true used to lock this page; now it means "finalized → archived".
+(function migrateLegacyAcquired() {
+  if (!state.acquired) return;
+  state.actuals = Object.assign({ planName: state.planName }, state.actuals || {}, { finalized: true });
+  resetPlanningToFresh();
+  persistPlanningSnapshotNow();
+})();
+
 // Reflect the opened site's name in the breadcrumb (from the persisted site list)
 (function setCrumbSiteName() {
   try {
@@ -1701,6 +1885,47 @@ function updateFreezeShadows() {
 }
 
 window.addEventListener('resize', updateFreezeShadows);
+
+/* ============================================================
+   ACTUALS handoff — the full Actuals workspace lives in actuals.html.
+   Pre-finalization the three Actuals tabs show a placeholder;
+   post-finalization they navigate to actuals.html for this site.
+============================================================ */
+let activeTab = 'planning';
+const ACT_PANEL_IDS = { cumulative:'panelCumulative', daily:'panelDaily', summary:'panelSummary' };
+
+function hasFinalizedActuals(){ return !!(state.actuals && state.actuals.finalized); }
+
+function switchTab(name){
+  if (name !== 'planning' && hasFinalizedActuals()){
+    location.href = 'actuals.html?siteId=' + encodeURIComponent(SITE_ID || 'demo') + '&tab=' + name;
+    return;
+  }
+  activeTab = name;
+  document.querySelectorAll('#mainTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  $('panelPlanning').style.display = (name === 'planning') ? '' : 'none';
+  Object.entries(ACT_PANEL_IDS).forEach(([n, id]) => $(id).classList.toggle('show', n === name));
+  if (name !== 'planning') renderActualsPanel(name);
+  // planning's sticky table needs offsets recomputed when shown again
+  if (name === 'planning') requestAnimationFrame(() => { updateStickyOffsets(); updateFreezeShadows(); });
+}
+
+function renderActualsPanel(name){
+  const panel = $(ACT_PANEL_IDS[name]);
+  panel.innerHTML = `
+    <div class="actuals-card"><div class="actuals-placeholder">
+      Performance Data not yet acquired.<br>
+      Acquire Performance Data on the <a onclick="switchTab('planning')">Execution Planning</a> tab to start tracking actuals.
+    </div></div>`;
+}
+
+/* Actuals tab wiring */
+document.addEventListener('DOMContentLoaded', () => {
+  $('mainTabs').addEventListener('click', e => {
+    const t = e.target.closest('.tab');
+    if (t) switchTab(t.dataset.tab);
+  });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const ts = document.querySelector('.table-scroll');
@@ -2582,11 +2807,12 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btnExport').addEventListener('click', () => toast('Export started (prototype)'));
   $('btnAcquire').addEventListener('click', () => {
     if (!state.imported || state.acquired) return;
-    state.acquired = true;
-    state.editMode = false;
-    state.lastEdited = ts();
-    render();
-    toast('Performance data acquisition started. Execution Planning is now locked.', 'success');
+    // Finalize: the submitted plan moves to the Actuals workspace (actuals.html)
+    // and Execution Planning resets to a fresh state for this site.
+    state.actuals = Object.assign({ planName: state.planName }, state.actuals || {}, { finalized: true, lastSyncedAt: ts() });
+    resetPlanningToFresh();
+    persistPlanningSnapshotNow();
+    location.href = 'actuals.html?siteId=' + encodeURIComponent(SITE_ID || 'demo');
   });
 
   // Footer
