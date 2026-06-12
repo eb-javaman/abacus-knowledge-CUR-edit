@@ -190,6 +190,16 @@
 </div>
 
 <script>
+/* Demo reset: opening index.html?reset wipes all prototype data
+   (abacus.* localStorage keys) and reloads into the clean state. */
+if (new URLSearchParams(location.search).has('reset')) {
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('abacus.'))
+    .forEach(k => localStorage.removeItem(k));
+  sessionStorage.clear();
+  location.replace(location.pathname); // drop the param so refreshes don't re-trigger
+}
+
 const ICON = {
   clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>',
