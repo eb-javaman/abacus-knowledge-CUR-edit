@@ -85,6 +85,16 @@
 
   /* ---------- Site cards ---------- */
   .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
+  /* empty state — same pattern as the Planning Sites list */
+  .empty-cards{
+    grid-column:1 / -1;
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+    padding:64px 20px;text-align:center;
+    font-size:14px;color:var(--text-mute);line-height:1.8;
+  }
+  .empty-cards b{color:var(--text-soft);}
+  .empty-cards a{color:var(--indigo-500);font-weight:600;text-decoration:none;}
+  .empty-cards a:hover{text-decoration:underline;}
   @media(max-width:1100px){.cards{grid-template-columns:1fr;}}
   .site-card{
     background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
@@ -311,14 +321,7 @@ function openActuals(siteId, tab){
   location.href = 'actuals.html?siteId=' + encodeURIComponent(siteId) + '&tab=' + tab;
 }
 
-const STATIC_CARDS = [
-  {status:'Syncing',        chart:'line', jp:false},
-  {status:'Auto Acquiring', chart:'bar',  jp:true},
-  {status:'Syncing',        chart:'line', jp:false, dimStart:true},
-  {status:'Auto Acquiring', chart:'line', jp:false}
-];
-
-// sites finalized via [Acquire Performance Data] surface here first
+// Ongoing Sites shows ONLY sites finalized via [Acquire Performance Data].
 function finalizedSiteCards(){
   try{
     const sites = JSON.parse(localStorage.getItem('abacus.sites') || '[]');
@@ -330,10 +333,19 @@ function finalizedSiteCards(){
     }).map(s => ({ name:s.name, siteId:s.id, status:'Auto Acquiring', chart:'line', updated:'Updated just now' }));
   }catch(_e){ return []; }
 }
-const CARDS = [...finalizedSiteCards(), ...STATIC_CARDS];
+const CARDS = finalizedSiteCards();
 
 const wrap = document.getElementById('cards');
-wrap.innerHTML = CARDS.map(siteCard).join('');
+if (CARDS.length){
+  wrap.innerHTML = CARDS.map(siteCard).join('');
+} else {
+  wrap.innerHTML = `
+    <div class="empty-cards">
+      進行中の現場はまだありません。<br>
+      Execution Planning ページ上の <b>Acquire Performance Data</b> を通じて計画が確定すると、ここに現場が表示されます。<br>
+      <a href="PlanningSitelist.html">Planning Sites</a> へ移動してください。
+    </div>`;
+}
 
 // tab switching swaps the chart inside the same card
 wrap.addEventListener('click',e=>{
