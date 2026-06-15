@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Abacus · Resource Unit Price</title>
+<style>
+  /* ---------- Design tokens (shared with cur.html) ---------- */
+  :root{
+    --white:#FFFFFF;
+    --indigo-50:#E5E4FB;
+    --indigo-100:#C3C0F6;
+    --indigo-200:#9791F1;
+    --indigo-300:#736CED;
+    --indigo-400:#5148EA;
+    --indigo-500:#2F24E6;
+    --indigo-600:#1D14C8;
+    --indigo-700:#140A94;
+    --green-50:#EAFBEB;
+    --green-500:#28D435;
+    --green-700:#167E1E;
+    --green-800:#0D5E13;
+    --red-50:#FDE8E9;
+    --red-500:#E94C53;
+
+    --bg-app:#F6F5FD;
+    --bg-side:#F1F0FC;
+    --line:#E6E6EF;
+    --line-strong:#D6D6E2;
+    --text:#1B1B27;
+    --text-soft:#5A5A6E;
+    --text-mute:#8A8A9C;
+    --chip-bg:#F1F1F5;
+    --chip-text:#3A3A4A;
+    --danger:#D8202B;
+    --danger-bg:#FDECEC;
+    --warn-bg:#FFF8E6;
+    --warn-line:#F2C94C;
+    --radius:12px;
+    --shadow-card:0 1px 2px rgba(16,16,40,.05);
+    --shadow-drawer:-18px 0 48px rgba(13,7,101,.16);
+    --shadow-modal:0 24px 64px rgba(7,4,60,.28);
+    --font:"Inter","Helvetica Neue","Hiragino Sans","Yu Gothic UI",system-ui,-apple-system,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg-app);-webkit-font-smoothing:antialiased;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ---------- App shell ---------- */
+  .appbar{
+    height:62px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 26px;background:var(--white);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;
+  }
+  .appbar .logo a{text-decoration:none;color:var(--indigo-500);}
+  .appbar .logo{font-size:24px;font-weight:800;letter-spacing:-.5px;}
+  .appbar-actions{display:flex;align-items:center;gap:20px;}
+  .appbar-actions svg{width:21px;height:21px;color:var(--text-soft);}
+
+  .app{display:flex;min-height:calc(100vh - 62px);}
+
+  /* Sidebar */
+  .sidebar{width:236px;flex:0 0 236px;background:var(--bg-side);border-right:1px solid var(--line);padding:22px 16px;}
+  .nav-group{margin-bottom:22px;}
+  .nav-head{display:flex;align-items:center;gap:9px;color:var(--indigo-500);font-weight:700;font-size:15px;padding:6px 8px;}
+  .nav-head svg{width:17px;height:17px;}
+  .nav-item{display:block;padding:9px 12px 9px 30px;color:var(--text-soft);font-size:14px;border-radius:9px;text-decoration:none;line-height:1.35;cursor:pointer;}
+  .nav-item:hover{background:#EAE9FA;}
+  .nav-item.active{background:var(--indigo-50);color:var(--indigo-700);font-weight:600;box-shadow:inset 0 0 0 1px rgba(115,108,237,.25);}
+
+  /* Main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .content{padding:26px 30px 60px;}
+  .page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:16px;}
+  .page-title{font-size:18px;font-weight:700;color:var(--indigo-500);margin:0;display:flex;align-items:center;gap:8px;}
+  .btn-primary{background:var(--indigo-500);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:14px;font-weight:600;}
+  .btn-primary:hover{background:var(--indigo-600);}
+
+  /* Info tooltip near title */
+  .info{position:relative;display:inline-flex;}
+  .info-icon{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--text-mute);color:var(--text-mute);
+    display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#fff;}
+  .info:hover .info-icon{border-color:var(--indigo-400);color:var(--indigo-500);}
+  .info-pop{
+    position:absolute;top:26px;left:-8px;width:300px;z-index:40;
+    background:var(--text);color:#fff;font-size:12px;font-weight:400;line-height:1.55;
+    padding:10px 12px;border-radius:8px;box-shadow:0 10px 30px rgba(13,7,101,.22);
+    opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s ease,transform .15s ease;
+  }
+  .info:hover .info-pop{opacity:1;visibility:visible;transform:translateY(0);}
+
+  .helper{font-size:12.5px;color:var(--text-soft);margin:0 0 18px;line-height:1.5;max-width:760px;}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:18px;}
+  .tab{
+    background:none;border:none;padding:10px 14px;font-size:14px;font-weight:600;color:var(--text-soft);
+    border-bottom:2.5px solid transparent;margin-bottom:-1px;border-radius:6px 6px 0 0;
+  }
+  .tab:hover{background:#EFEEFB;color:var(--indigo-600);}
+  .tab.active{color:var(--indigo-600);border-bottom-color:var(--indigo-500);background:var(--indigo-50);}
+
+  /* Table */
+  .table-wrap{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto;box-shadow:var(--shadow-card);}
+  table.rt{width:100%;min-width:1040px;border-collapse:collapse;font-size:14px;}
+  table.rt thead th{
+    background:#F6F6FA;text-align:left;font-weight:700;color:var(--text);
+    padding:14px 16px;border-bottom:1px solid var(--line-strong);white-space:nowrap;vertical-align:bottom;
+  }
+  table.rt thead th.sortable{cursor:pointer;}
+  table.rt thead th .th{display:inline-flex;align-items:center;gap:6px;}
+  table.rt thead th .sort-ic{width:14px;height:14px;color:var(--text-mute);flex-shrink:0;}
+  table.rt thead th.sorted .sort-ic{color:var(--indigo-500);}
+  table.rt tbody td{padding:13px 16px;border-bottom:1px solid var(--line);color:var(--text);vertical-align:middle;}
+  table.rt tbody tr:last-child td{border-bottom:none;}
+  table.rt tbody tr:nth-child(even) td{background:#FBFBFE;}
+  .cat-pill{display:inline-block;background:var(--chip-bg);border:1px solid #E4E4EC;color:var(--chip-text);
+    border-radius:6px;padding:3px 10px;font-size:12.5px;}
+  .price-cell{white-space:nowrap;color:var(--text);}
+
+  /* Memo cell — truncate + hover popover */
+  .memo-cell{position:relative;max-width:200px;}
+  .memo-trunc{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-soft);}
+  .memo-pop{
+    position:absolute;top:calc(100% + 6px);left:0;width:330px;z-index:25;
+    background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 36px rgba(13,7,101,.18);
+    padding:14px 16px;font-size:13px;color:var(--text-soft);line-height:1.6;
+    opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s ease,transform .15s ease;
+    white-space:normal;
+  }
+  .memo-cell:hover .memo-pop{opacity:1;visibility:visible;transform:translateY(0);}
+
+  .cell-actions{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .btn-details{
+    background:#fff;border:1px solid var(--line-strong);border-radius:8px;
+    padding:5px 12px;font-size:13px;font-weight:600;color:var(--text);
+  }
+  .btn-details:hover{border-color:var(--indigo-300);color:var(--indigo-600);}
+  .icon-btn{background:none;border:none;color:var(--text-soft);padding:6px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;}
+  .icon-btn:hover{background:#F0EFFB;color:var(--indigo-600);}
+  .icon-btn svg{width:18px;height:18px;}
+  /* boxed pencil edit button (its own border lives inside the SVG) */
+  .btn-edit{background:none;border:none;padding:0;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;line-height:0;}
+  .btn-edit svg{width:24px;height:24px;display:block;}
+  .btn-edit:hover{opacity:.78;}
+
+  .empty{padding:60px 24px;text-align:center;color:var(--text-mute);}
+  .empty h3{margin:0 0 6px;color:var(--text-soft);font-size:16px;}
+  .empty p{margin:0;font-size:13.5px;}
+
+  /* ---------- Drawer (shared pattern) ---------- */
+  .scrim{position:fixed;inset:0;background:rgba(15,12,45,.34);opacity:0;visibility:hidden;transition:opacity .2s ease;z-index:40;}
+  .scrim.show{opacity:1;visibility:visible;}
+  .drawer{
+    position:fixed;top:0;right:0;height:100vh;width:440px;max-width:94vw;background:var(--white);
+    box-shadow:var(--shadow-drawer);z-index:50;transform:translateX(100%);
+    transition:transform .26s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;
+  }
+  .drawer.show{transform:translateX(0);}
+  #drawerContent{display:flex;flex-direction:column;flex:1;min-height:0;}
+  .drawer-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid var(--line);}
+  .drawer-title{font-size:18px;font-weight:700;margin:0;}
+  .drawer-sub{font-size:12px;color:var(--text-mute);margin-top:3px;}
+  .drawer-body{padding:20px 22px;overflow-y:auto;flex:1;min-height:0;}
+  .drawer-foot{display:flex;align-items:center;gap:12px;padding:16px 22px;border-top:1px solid var(--line);background:var(--white);}
+  .drawer-foot .spacer{flex:1;}
+
+  /* Forms */
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:14px;font-weight:700;margin-bottom:7px;}
+  .input{width:100%;border:1.5px solid var(--line-strong);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:#F3F3F7;font-family:inherit;}
+  .input:focus{outline:none;border-color:var(--indigo-400);background:#fff;box-shadow:0 0 0 3px rgba(81,72,234,.14);}
+  textarea.input{resize:vertical;min-height:120px;line-height:1.55;}
+  .field.required label::after{content:" *";color:var(--danger);}
+
+  .btn-text{background:none;border:none;color:var(--indigo-500);font-size:14px;font-weight:600;padding:10px 6px;border-radius:8px;}
+  .btn-text:hover{background:#F0EFFB;}
+  .btn-outline{background:#fff;border:1.5px solid var(--line-strong);color:var(--text);border-radius:9px;padding:9px 18px;font-size:14px;font-weight:600;}
+  .btn-outline:hover{border-color:var(--danger);color:var(--danger);}
+  .btn-save{background:var(--indigo-500);color:#fff;border:none;border-radius:9px;padding:10px 22px;font-size:14px;font-weight:700;}
+  .btn-save:hover{background:var(--indigo-600);}
+
+  /* Usage Actuals (details) drawer */
+  .ua-row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:8px 0;color:var(--text-soft);border-bottom:1px solid var(--line);}
+  .ua-row b{color:var(--text);}
+  .section-label{font-size:14px;font-weight:700;margin:22px 0 8px;}
+  .hist{padding:12px 0;border-bottom:1px solid var(--line);}
+  .hist-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+  .hist-name{font-weight:700;font-size:14px;}
+  .hist-fig{color:var(--indigo-500);font-weight:700;font-size:13px;}
+  .hist-meta{font-size:12px;color:var(--text-mute);margin-top:4px;line-height:1.5;}
+  .ro-note{background:var(--chip-bg);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text-soft);margin-bottom:14px;}
+
+  /* Modal (destructive only) */
+  .modal-scrim{position:fixed;inset:0;background:rgba(15,12,45,.45);display:none;align-items:center;justify-content:center;z-index:80;padding:20px;}
+  .modal-scrim.show{display:flex;}
+  .modal{background:#fff;border-radius:16px;box-shadow:var(--shadow-modal);width:480px;max-width:100%;padding:26px 28px 28px;animation:pop .18s ease;}
+  @keyframes pop{from{transform:scale(.96);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+  .modal-title{font-size:21px;font-weight:800;margin:0;}
+  .modal-body{border:1px solid var(--line);border-radius:12px;padding:26px 22px;text-align:center;color:var(--text-soft);font-size:14.5px;line-height:1.7;}
+  .modal-actions{display:flex;justify-content:center;gap:14px;margin-top:24px;}
+  .btn-cancel{background:#fff;border:1.5px solid var(--line-strong);border-radius:10px;padding:11px 26px;font-size:15px;font-weight:600;color:var(--text);}
+  .btn-cancel:hover{background:#F4F4F8;}
+  .btn-danger{background:var(--danger);color:#fff;border:none;border-radius:10px;padding:11px 28px;font-size:15px;font-weight:700;}
+  .btn-danger:hover{background:#B81820;}
+
+  /* Toast (same as cur.html) */
+  .toast{position:fixed;bottom:32px;right:24px;background:var(--white);border:1.5px solid var(--line-strong);
+    border-radius:8px;padding:12px 14px 12px 12px;display:none;align-items:flex-start;gap:10px;
+    min-width:280px;max-width:420px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.12);color:var(--text);font-size:13px;
+    transform:translateY(8px);opacity:0;transition:opacity .2s ease,transform .2s ease;}
+  .toast.show{display:flex;opacity:1;transform:translateY(0);}
+  .toast .t-icon{flex-shrink:0;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;}
+  .toast .t-icon svg{width:22px;height:22px;}
+  .toast .t-body{flex:1;min-width:0;}
+  .toast .t-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;}
+  .toast .t-desc{font-size:12px;color:var(--text-soft);margin-top:4px;line-height:1.45;display:none;word-wrap:break-word;}
+  .toast.has-desc .t-desc{display:block;}
+  .toast .t-close{background:transparent;border:none;cursor:pointer;color:var(--text-mute);width:22px;height:22px;
+    display:flex;align-items:center;justify-content:center;padding:0;font-size:18px;line-height:1;flex-shrink:0;}
+  .toast .t-close:hover{color:var(--text);}
+  .toast.success{border-color:var(--green-500);}
+  .toast.success .t-icon{color:var(--green-500);}
+  .toast.error{background:var(--red-50);border-color:var(--red-500);}
+  .toast.error .t-icon{color:var(--red-500);}
+
+  .hidden{display:none !important;}
+</style>
+<link rel="stylesheet" href="buttons.css" />
+</head>
+<body>
+<!-- Full-width app header -->
+<header class="appbar">
+  <div class="logo"><a href="index.html">abacus</a></div>
+  <div class="appbar-actions">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+  </div>
+</header>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="nav-group">
+      <div class="nav-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Sites
+      </div>
+      <a href="index.html" class="nav-item">Ongoing Sites</a>
+      <a href="PlanningSitelist.html" class="nav-item">Planning Sites</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+        Knowledge
+      </div>
+      <a href="cur.html" class="nav-item">Construction Unit Rates</a>
+      <a href="resource-pricing.html" class="nav-item active">Resource Unit Price</a>
+      <a class="nav-item">Past Sites</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <main class="content">
+      <div class="page-head">
+        <h1 class="page-title">
+          Resource Unit Price
+          <span class="info">
+            <span class="info-icon">i</span>
+            <span class="info-pop">Updates apply to newly created Construction Unit Rates. Existing Construction Unit Rates keep the prices stored when they were created.</span>
+          </span>
+        </h1>
+        <button class="btn-primary" id="registerBtn">Register New Resource</button>
+      </div>
+      <p class="helper">Resource Unit Price is master data. Updates apply to newly created Construction Unit Rates — existing Construction Unit Rates and Execution Planning rows keep the prices stored when they were created and are not recalculated.</p>
+
+      <div class="tabs" id="tabs"></div>
+      <div class="table-wrap" id="tableWrap"></div>
+    </main>
+  </div>
+</div>
+
+<!-- Drawer -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true"><div id="drawerContent"></div></aside>
+
+<!-- Modal -->
+<div class="modal-scrim" id="modalScrim"><div class="modal" id="modalBox"></div></div>
+
+<!-- Toast -->
+<div id="toast" class="toast" role="status" aria-live="polite">
+  <span class="t-icon" id="tIcon"></span>
+  <div class="t-body">
+    <div class="t-title" id="tTitle"></div>
+    <div class="t-desc" id="tDesc"></div>
+  </div>
+  <button class="t-close" id="tClose" type="button" aria-label="Close">×</button>
+</div>
+
+<script>
+/* =====================================================================
+   ICONS
+===================================================================== */
+const SVG = {
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>',
+  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+  sort:'<svg class="sort-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>',
+  editBox:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 0.5H20C21.933 0.5 23.5 2.067 23.5 4V20C23.5 21.933 21.933 23.5 20 23.5H4C2.067 23.5 0.5 21.933 0.5 20V4C0.5 2.067 2.067 0.5 4 0.5Z" fill="white" stroke="#2F24E6"/><path d="M7 17.9981V15.9981H17V17.9981H7ZM8 14.9981V13.1231L12.525 8.59814L14.4 10.4731L9.875 14.9981H8ZM9 13.9981H9.45L13 10.4731L12.525 9.99814L9 13.5481V13.9981ZM14.9625 9.92314L13.0875 8.04814L13.9875 7.14814C14.0792 7.04814 14.1958 7.00014 14.3375 7.00414C14.4792 7.00847 14.5958 7.05647 14.6875 7.14814L15.8625 8.32314C15.9542 8.4148 16 8.52947 16 8.66714C16 8.80447 15.9542 8.92314 15.8625 9.02314L14.9625 9.92314Z" fill="#2F24E6"/></svg>'
+};
+
+/* =====================================================================
+   DATA — master list, persisted under abacus.resources
+===================================================================== */
+const STORE_KEY = 'abacus.resources';
+const TYPES = ['Machinery','Transport Vehicle','Labor'];
+const LOREM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna at elementum tempus, magna lorem tincidunt dolor, sed aliquam lectus augue vitae mauris. Curabitur viverra, arcu a ultricies dictum, orci ex fermentum velit, non pharetra libero dolor vitae lacus.';
+
+function seedResources(){
+  return [
+    {id:'res-1',type:'Machinery',name:'Backhoe',category:'In-house',specification:'10t',std:100,ot:100,wh:120,memo:LOREM,
+      usage:[{site:'Site A',period:'2026/01/10〜2026/04/20',qty:2,rateAt:100},{site:'Site C',period:'2025/09/01〜2025/12/10',qty:1,rateAt:95}]},
+    {id:'res-2',type:'Machinery',name:'Bulldozer',category:'In-house',specification:'20t',std:100,ot:100,wh:120,memo:LOREM,
+      usage:[{site:'Site B',period:'2026/01/10〜2026/04/20',qty:1,rateAt:100}]},
+    {id:'res-3',type:'Machinery',name:'Vibratory Roller',category:'Outsource',specification:'0.7m³',std:100,ot:100,wh:120,memo:LOREM,
+      usage:[]},
+    {id:'res-4',type:'Transport Vehicle',name:'Dump Truck',category:'Outsource',specification:'10t',std:80,ot:100,wh:120,memo:LOREM,
+      usage:[{site:'Site A',period:'2026/01/10〜2026/04/20',qty:3,rateAt:80}]},
+    {id:'res-5',type:'Transport Vehicle',name:'Trailer',category:'Outsource',specification:'20t',std:120,ot:150,wh:180,memo:LOREM,
+      usage:[]},
+    {id:'res-6',type:'Labor',name:'Operator',category:'In-house',specification:'Standard',std:25,ot:35,wh:45,memo:LOREM,
+      usage:[{site:'Site A',period:'2026/01/10〜2026/04/20',qty:12,rateAt:25}]},
+    {id:'res-7',type:'Labor',name:'Worker',category:'In-house',specification:'Standard',std:20,ot:30,wh:40,memo:LOREM,
+      usage:[]}
+  ];
+}
+
+function loadResources(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length) return parsed;
+    }
+  }catch(e){ console.warn('Failed to read', STORE_KEY, e); }
+  const seeded = seedResources();
+  saveResources(seeded);
+  return seeded;
+}
+function saveResources(list){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(list)); }
+  catch(e){ console.error('Failed to persist', STORE_KEY, e); }
+}
+
+/* =====================================================================
+   STATE  (immutable updates — never mutate a resource in place)
+===================================================================== */
+let resources = loadResources();
+let activeType = TYPES[0];
+let sort = { key:null, dir:1 };   // dir 1 asc, -1 desc
+
+const $ = sel => document.querySelector(sel);
+const drawer = $('#drawer'), scrim = $('#scrim'), drawerContent = $('#drawerContent');
+const modalScrim = $('#modalScrim'), modalBox = $('#modalBox');
+const esc = s => String(s ?? '').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const money = n => '$' + (Number(n) || 0);
+const getRes = id => resources.find(r => r.id === id);
+const newId = () => 'res-' + (Math.max(0, ...resources.map(r => +String(r.id).replace(/\D/g,'') || 0)) + 1);
+const stamp = () => { const d = new Date(); return d.toISOString().slice(0,10); };
+
+/* =====================================================================
+   TABS
+===================================================================== */
+function renderTabs(){
+  $('#tabs').innerHTML = TYPES.map(t =>
+    `<button class="tab ${t===activeType?'active':''}" data-type="${esc(t)}">${esc(t)}</button>`).join('');
+  $('#tabs').querySelectorAll('.tab').forEach(b => b.addEventListener('click',()=>{
+    activeType = b.dataset.type; sort = { key:null, dir:1 }; render();
+  }));
+}
+
+/* =====================================================================
+   TABLE
+===================================================================== */
+const COLS = [
+  {key:'name', label:'Name', sortable:true},
+  {key:'category', label:'Category', sortable:true},
+  {key:'specification', label:'Specification', sortable:true},
+  {key:'std', label:'Standard<br>Unit Price/h', sortable:true},
+  {key:'ot', label:'Overtime<br>Unit Price/h', sortable:true},
+  {key:'wh', label:'Weekend/Holidays<br>Unit Price/h', sortable:true}
+];
+
+function sortedRows(){
+  const rows = resources.filter(r => r.type === activeType);
+  if(!sort.key) return rows;
+  return [...rows].sort((a,b)=>{
+    const va = a[sort.key], vb = b[sort.key];
+    const cmp = (typeof va === 'number' && typeof vb === 'number')
+      ? va - vb : String(va).localeCompare(String(vb));
+    return cmp * sort.dir;
+  });
+}
+
+function renderTable(){
+  const rows = sortedRows();
+  const head = `
+    <thead><tr>
+      ${COLS.map(c=>`
+        <th class="${c.sortable?'sortable':''} ${sort.key===c.key?'sorted':''}" ${c.sortable?`data-sort="${c.key}"`:''}>
+          <span class="th">${c.label}${c.sortable?SVG.sort:''}</span>
+        </th>`).join('')}
+      <th>Memo</th>
+      <th>Usage Actuals</th>
+    </tr></thead>`;
+
+  const body = rows.length ? `<tbody>${rows.map(r=>`
+    <tr data-id="${r.id}">
+      <td><b>${esc(r.name)}</b></td>
+      <td><span class="cat-pill">${esc(r.category)}</span></td>
+      <td>${esc(r.specification)}</td>
+      <td class="price-cell">${money(r.std)}</td>
+      <td class="price-cell">${money(r.ot)}</td>
+      <td class="price-cell">${money(r.wh)}</td>
+      <td>
+        <div class="memo-cell">
+          <span class="memo-trunc" title="${esc(r.memo)}">${esc(r.memo) || '—'}</span>
+          ${r.memo ? `<div class="memo-pop">${esc(r.memo)}</div>` : ''}
+        </div>
+      </td>
+      <td>
+        <div class="cell-actions">
+          <button class="btn-details" data-act="details">details</button>
+          <button class="btn-edit" data-act="edit" title="Edit" aria-label="Edit">${SVG.editBox}</button>
+        </div>
+      </td>
+    </tr>`).join('')}</tbody>` : '';
+
+  $('#tableWrap').innerHTML = `<table class="rt">${head}${body}</table>` +
+    (rows.length ? '' : `<div class="empty"><h3>No ${esc(activeType)} resources yet</h3><p>Click “Register New Resource” to add the first one.</p></div>`);
+
+  // sort handlers
+  $('#tableWrap').querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click',()=>{
+    const k = th.dataset.sort;
+    sort = (sort.key === k) ? { key:k, dir:-sort.dir } : { key:k, dir:1 };
+    renderTable();
+  }));
+  // row action handlers
+  $('#tableWrap').querySelectorAll('tr[data-id]').forEach(tr=>{
+    const id = tr.dataset.id;
+    tr.querySelector('[data-act="details"]')?.addEventListener('click',()=>openUsageDrawer(id));
+    tr.querySelector('[data-act="edit"]')?.addEventListener('click',()=>openEditDrawer(id));
+  });
+}
+
+function render(){ renderTabs(); renderTable(); }
+
+/* =====================================================================
+   DRAWER open / close
+===================================================================== */
+function openDrawer(){ scrim.classList.add('show'); drawer.classList.add('show'); drawer.setAttribute('aria-hidden','false'); }
+function closeDrawer(){ scrim.classList.remove('show'); drawer.classList.remove('show'); drawer.setAttribute('aria-hidden','true'); }
+scrim.addEventListener('click', closeDrawer);
+
+/* ----- shared form markup ----- */
+function priceField(id,label,value){
+  return `<div class="field"><label>${label}</label><input class="input" id="${id}" value="${value!=null?'$'+value:''}" inputmode="decimal" /></div>`;
+}
+function formFields(r){
+  r = r || {};
+  return `
+    <div class="field required"><label>Name</label><input class="input" id="fName" value="${esc(r.name||'')}" autocomplete="off" /></div>
+    <div class="field"><label>Category</label><input class="input" id="fCategory" value="${esc(r.category||'')}" /></div>
+    <div class="field"><label>Specification</label><input class="input" id="fSpec" value="${esc(r.specification||'')}" /></div>
+    ${priceField('fStd','Standard Unit Price ($/h)', r.std)}
+    ${priceField('fOt','Overtime Unit Price ($/h)', r.ot)}
+    ${priceField('fWh','Weekend/Holidays Unit Price ($/h)', r.wh)}
+    <div class="field" style="margin-bottom:0;"><label>Memo</label>
+      <textarea class="input" id="fMemo" placeholder="Add a note (optional)">${esc(r.memo||'')}</textarea>
+    </div>`;
+}
+const numFrom = v => { const m = String(v).match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; };
+function readForm(){
+  return {
+    name: $('#fName').value.trim(),
+    category: $('#fCategory').value.trim(),
+    specification: $('#fSpec').value.trim(),
+    std: numFrom($('#fStd').value),
+    ot: numFrom($('#fOt').value),
+    wh: numFrom($('#fWh').value),
+    memo: $('#fMemo').value.trim()
+  };
+}
+
+/* =====================================================================
+   REGISTER drawer  (registers into the active tab's type)
+===================================================================== */
+function openRegisterDrawer(){
+  drawerContent.innerHTML = `
+    <div class="drawer-head">
+      <div>
+        <h2 class="drawer-title">Register New Resource Unit Price</h2>
+        <div class="drawer-sub">Type: ${esc(activeType)}</div>
+      </div>
+      <button class="icon-btn" id="dClose">${SVG.close}</button>
+    </div>
+    <div class="drawer-body">${formFields({})}</div>
+    <div class="drawer-foot">
+      <div class="spacer"></div>
+      <button class="btn-cancel" id="dCancel" style="padding:9px 18px;font-size:14px;">cancel</button>
+      <button class="btn-save" id="dRegister">Register</button>
+    </div>`;
+  openDrawer();
+  setTimeout(()=>$('#fName')?.focus(),60);
+  $('#dClose').addEventListener('click', closeDrawer);
+  $('#dCancel').addEventListener('click', closeDrawer);
+  $('#dRegister').addEventListener('click', confirmRegister);
+}
+function confirmRegister(){
+  const data = readForm();
+  if(!data.name){ toast('Name is required','error'); $('#fName')?.focus(); return; }
+  const created = { id:newId(), type:activeType, ...data, usage:[], updatedAt:stamp() };
+  resources = [created, ...resources];   // immutable: new array
+  saveResources(resources);
+  closeDrawer();
+  render();
+  toast('New resource registered','success',{desc:'It will be available for newly created Construction Unit Rates.'});
+}
+
+/* =====================================================================
+   EDIT drawer  (explicit per-row edit — no inline editing)
+===================================================================== */
+function openEditDrawer(id){
+  const r = getRes(id);
+  if(!r) return;
+  drawerContent.innerHTML = `
+    <div class="drawer-head">
+      <div>
+        <h2 class="drawer-title">Edit Resource Unit Price</h2>
+        <div class="drawer-sub">${esc(r.name)}</div>
+      </div>
+      <button class="icon-btn" id="dClose">${SVG.close}</button>
+    </div>
+    <div class="drawer-body">${formFields(r)}</div>
+    <div class="drawer-foot">
+      <button class="btn-outline" id="dDelete">delete</button>
+      <div class="spacer"></div>
+      <button class="btn-text" id="dCancel">cancel</button>
+      <button class="btn-save" id="dSave">Save</button>
+    </div>`;
+  openDrawer();
+  setTimeout(()=>$('#fName')?.focus(),60);
+  $('#dClose').addEventListener('click', closeDrawer);
+  $('#dCancel').addEventListener('click', closeDrawer);
+  $('#dDelete').addEventListener('click',()=>openDeleteModal(id));
+  $('#dSave').addEventListener('click',()=>saveEdit(id));
+}
+function saveEdit(id){
+  const data = readForm();
+  if(!data.name){ toast('Name is required','error'); $('#fName')?.focus(); return; }
+  // immutable update: replace the matching record with a new object
+  resources = resources.map(r => r.id === id ? { ...r, ...data, updatedAt:stamp() } : r);
+  saveResources(resources);
+  closeDrawer();
+  render();
+  // Master-data rule: existing CURs / plans are NOT recalculated.
+  toast('Resource Unit Price updated.','success',{desc:'Existing Construction Unit Rates were not changed.'});
+}
+
+/* =====================================================================
+   USAGE ACTUALS drawer  (read-only)
+===================================================================== */
+function openUsageDrawer(id){
+  const r = getRes(id);
+  if(!r) return;
+  const usage = r.usage || [];
+  drawerContent.innerHTML = `
+    <div class="drawer-head">
+      <div>
+        <h2 class="drawer-title">Usage Actuals</h2>
+        <div class="drawer-sub">${esc(r.name)} · ${esc(r.type)}</div>
+      </div>
+      <button class="icon-btn" id="dClose">${SVG.close}</button>
+    </div>
+    <div class="drawer-body">
+      <div class="ro-note">Read-only · Historical usage of this resource price.</div>
+      <div class="ua-row"><span>Category</span><b>${esc(r.category)||'—'}</b></div>
+      <div class="ua-row"><span>Specification</span><b>${esc(r.specification)||'—'}</b></div>
+      <div class="ua-row"><span>Current Standard / Overtime / Weekend</span><b>${money(r.std)} / ${money(r.ot)} / ${money(r.wh)}</b></div>
+
+      <div class="section-label">Used in Construction (${usage.length})</div>
+      ${usage.length ? usage.map((u,i)=>`
+        <div class="hist">
+          <div class="hist-top">
+            <div class="hist-name">${i+1}. ${esc(u.site)}</div>
+            <div class="hist-fig">${money(u.rateAt)}/h · ×${esc(u.qty)}</div>
+          </div>
+          <div class="hist-meta">Period: ${esc(u.period)}<br>Price stored at creation: ${money(u.rateAt)}/h</div>
+        </div>`).join('')
+        : `<div class="empty" style="padding:30px 8px;"><p>This resource price has not been used in any Construction Unit Rate yet.</p></div>`}
+    </div>`;
+  openDrawer();
+  $('#dClose').addEventListener('click', closeDrawer);
+}
+
+/* =====================================================================
+   DELETE modal  (destructive confirmation only)
+===================================================================== */
+function openDeleteModal(id){
+  const r = getRes(id);
+  if(!r) return;
+  const usedCount = (r.usage || []).length;
+  modalBox.innerHTML = `
+    <div class="modal-head">
+      <h2 class="modal-title">Delete resource?</h2>
+      <button class="icon-btn" id="mClose">${SVG.close}</button>
+    </div>
+    <div class="modal-body">
+      ${usedCount
+        ? `This resource is used in <b>${usedCount}</b> Construction Unit Rate${usedCount>1?'s':''}.<br>Existing Construction Unit Rates keep their stored prices. Remove anyway?`
+        : `This action cannot be undone.<br>Confirm to delete <b>${esc(r.name)}</b>.`}
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="mCancel">Cancel</button>
+      <button class="btn-danger" id="mConfirm">Delete</button>
+    </div>`;
+  modalScrim.classList.add('show');
+  $('#mClose').addEventListener('click', hideModal);
+  $('#mCancel').addEventListener('click', hideModal);
+  $('#mConfirm').addEventListener('click',()=>{
+    resources = resources.filter(x => x.id !== id);   // immutable
+    saveResources(resources);
+    hideModal();
+    closeDrawer();
+    render();
+    toast('Resource deleted','success',{desc:'Existing Construction Unit Rates were not changed.'});
+  });
+}
+function hideModal(){ modalScrim.classList.remove('show'); }
+modalScrim.addEventListener('click', e=>{ if(e.target===modalScrim) hideModal(); });
+
+/* =====================================================================
+   TOAST  (same UI as cur.html / planning.html)
+===================================================================== */
+const TOAST_ICONS = {
+  success:'<svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9.25" stroke="currentColor" stroke-width="1.5"/><path d="m6.5 11.5 3 3 6-6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  error:'<svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9.5" fill="currentColor"/><path d="M11 6v6.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/><circle cx="11" cy="15.5" r="1" fill="white"/></svg>'
+};
+let toastTimer;
+function toast(msg, kind, opts){
+  kind = (kind || 'success').trim(); opts = opts || {};
+  $('#tIcon').innerHTML = TOAST_ICONS[kind] || TOAST_ICONS.success;
+  $('#tTitle').textContent = msg || '';
+  $('#tDesc').textContent = opts.desc || '';
+  $('#toast').className = 'toast show ' + kind + (opts.desc ? ' has-desc' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, kind === 'error' ? 8000 : 5000);
+}
+function hideToast(){ $('#toast').className = 'toast'; clearTimeout(toastTimer); }
+$('#tClose').addEventListener('click', hideToast);
+
+/* Esc to close */
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ if(modalScrim.classList.contains('show')) hideModal(); else if(drawer.classList.contains('show')) closeDrawer(); }
+});
+
+/* wire toolbar + init */
+$('#registerBtn').addEventListener('click', openRegisterDrawer);
+render();
+</script>
+</body>
+</html>
